@@ -109,6 +109,25 @@ final class FMPPC_Admin {
 		$out['trust_proxy_header'] = in_array( $hdr, array( '', 'cf-connecting-ip', 'x-forwarded-for', 'x-real-ip', 'true-client-ip' ), true ) ? $hdr : '';
 		$out['retention_days']     = max( 1, min( 3650, (int) ( $in['retention_days'] ?? $d['retention_days'] ) ) );
 		$out['mpp_secret']         = ! empty( $cur['mpp_secret'] ) ? $cur['mpp_secret'] : wp_generate_password( 48, true, true );
+		$key                       = trim( (string) ( $in['pro_key'] ?? '' ) );
+		$out['pro_key']            = preg_match( '/^fmppc_[A-Za-z0-9_\-]{20,}$/', $key ) ? $key : '';
+		if ( '' !== $key && '' === $out['pro_key'] ) {
+			add_settings_error( 'fmppc', 'pro_key', __( 'That does not look like a Pro license key (they start with fmppc_).', 'forgemesh-pay-per-crawl' ) );
+		}
+		$out['pro_listed'] = empty( $in['pro_listed'] ) ? 0 : 1;
+		if ( '' !== $out['pro_key'] ) {
+			$probe = new FMPPC_Pro( array_merge( $out, array( 'pro_key' => $out['pro_key'] ) ) );
+			$r     = $probe->verify();
+			if ( empty( $r['ok'] ) ) {
+				add_settings_error( 'fmppc', 'pro_verify', sprintf( /* translators: reason */ __( 'Pro key saved but not verified: %s. The plugin will retry hourly.', 'forgemesh-pay-per-crawl' ), (string) ( $r['status'] ?? $r['error'] ?? 'unknown' ) ), 'warning' );
+			} else {
+				add_settings_error( 'fmppc', 'pro_ok', __( 'Pro license verified. First sync runs within the hour.', 'forgemesh-pay-per-crawl' ), 'success' );
+			}
+		} else {
+			delete_option( FMPPC_Pro::OPT_STATE );
+			delete_option( FMPPC_Pro::OPT_INTEL );
+			FMPPC_Pro::unschedule();
+		}
 		return $out;
 	}
 
@@ -159,6 +178,11 @@ final class FMPPC_Admin {
 				<span class="fmppc-mode fmppc-mode-<?php echo esc_attr( $s['mode'] ); ?>"><?php echo 'gate' === $s['mode'] ? esc_html__( 'Charging', 'forgemesh-pay-per-crawl' ) : esc_html__( 'Monitor only', 'forgemesh-pay-per-crawl' ); ?></span>
 			</p>
 
+			<?php $pst = FMPPC_Pro::state(); if ( FMPPC_Pro::enabled( $s ) ) : ?>
+				<p class="fmppc-pro"><?php echo ! empty( $pst['ok'] ) ? '<strong>Pro</strong> ' . esc_html__( 'active', 'forgemesh-pay-per-crawl' ) : '<strong>Pro</strong> ' . esc_html( (string) ( $pst['status'] ?? 'pending' ) ); ?> · <a href="<?php echo esc_url( ! empty( $pst['dashboard'] ) ? $pst['dashboard'] : FMPPC_Pro::BASE . '/wp/dashboard' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open hosted dashboard', 'forgemesh-pay-per-crawl' ); ?></a><?php if ( ! empty( $pst['synced_at'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: time ago */ __( 'synced %s ago', 'forgemesh-pay-per-crawl' ), human_time_diff( (int) $pst['synced_at'] ) ) ); ?><?php endif; ?></p>
+			<?php else : ?>
+				<p class="fmppc-pro fmppc-pro-upsell"><?php esc_html_e( 'Want all your sites in one place, a Monday digest, paywall alerts and a bot list that updates itself?', 'forgemesh-pay-per-crawl' ); ?> <a href="<?php echo esc_url( FMPPC_Pro::BASE . '/wp?utm_source=plugin' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Pro is $4.99/month', 'forgemesh-pay-per-crawl' ); ?></a></p>
+			<?php endif; ?>
 			<div class="fmppc-tiles">
 				<div class="fmppc-tile"><span><?php esc_html_e( 'Bot hits', 'forgemesh-pay-per-crawl' ); ?></span><strong><?php echo esc_html( number_format_i18n( $t['bot_hits'] ) ); ?></strong><em><?php echo esc_html( sprintf( /* translators: count */ __( '%s today', 'forgemesh-pay-per-crawl' ), number_format_i18n( $t1['bot_hits'] ) ) ); ?></em></div>
 				<div class="fmppc-tile"><span><?php esc_html_e( 'Distinct bot sources', 'forgemesh-pay-per-crawl' ); ?></span><strong><?php echo esc_html( number_format_i18n( $t['bot_sources'] ) ); ?></strong><em><?php esc_html_e( 'by hashed IP', 'forgemesh-pay-per-crawl' ); ?></em></div>
@@ -344,6 +368,22 @@ final class FMPPC_Admin {
 						<label><input type="radio" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator]" value="custom" <?php checked( 'custom', $o['facilitator'] ); ?>> <?php esc_html_e( 'Custom URL', 'forgemesh-pay-per-crawl' ); ?></label>
 						<input type="url" class="regular-text code" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator_url]" value="<?php echo esc_attr( $o['facilitator_url'] ); ?>" placeholder="https://">
 						<br><label><?php esc_html_e( 'Authorization header (optional)', 'forgemesh-pay-per-crawl' ); ?> <input type="text" class="regular-text code" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator_auth]" value="<?php echo esc_attr( $o['facilitator_auth'] ); ?>" placeholder="Bearer …"></label></td></tr>
+				</table>
+				<h2><?php esc_html_e( '5. Pro (optional)', 'forgemesh-pay-per-crawl' ); ?></h2>
+				<p><?php esc_html_e( 'Pro adds a hosted dashboard for all your sites, a Monday email digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the ForgeMesh paid-sites directory. $4.99/month for up to 5 sites.', 'forgemesh-pay-per-crawl' ); ?>
+				<a href="<?php echo esc_url( FMPPC_Pro::BASE . '/wp?utm_source=plugin' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Get a license key', 'forgemesh-pay-per-crawl' ); ?></a></p>
+				<?php $pst = FMPPC_Pro::state(); ?>
+				<table class="form-table" role="presentation">
+					<tr><th><label for="fmppc_pro_key"><?php esc_html_e( 'License key', 'forgemesh-pay-per-crawl' ); ?></label></th>
+						<td><input type="text" class="regular-text code" id="fmppc_pro_key" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[pro_key]" value="<?php echo esc_attr( $o['pro_key'] ); ?>" placeholder="fmppc_…" autocomplete="off">
+						<?php if ( '' !== $o['pro_key'] ) : ?>
+							<p class="description"><?php echo ! empty( $pst['ok'] ) ? '<span style="color:#0b6b2e">&#10003; ' . esc_html( sprintf( /* translators: 1 status, 2 used, 3 limit */ __( 'verified (%1$s), %2$d of %3$d sites', 'forgemesh-pay-per-crawl' ), $pst['status'], $pst['sites_used'], $pst['site_limit'] ) ) . '</span>' : '<span style="color:#b32d2e">' . esc_html( sprintf( /* translators: status */ __( 'not verified: %s', 'forgemesh-pay-per-crawl' ), (string) ( $pst['status'] ?? 'pending' ) ) ) . '</span>'; ?>
+							<?php if ( ! empty( $pst['synced_at'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: time ago */ __( 'last sync %s ago', 'forgemesh-pay-per-crawl' ), human_time_diff( (int) $pst['synced_at'] ) ) ); ?><?php echo ! empty( $pst['sync_error'] ) ? ' (' . esc_html( $pst['sync_error'] ) . ')' : ''; ?><?php endif; ?>
+							<?php if ( ! empty( $pst['intel_count'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: 1 count, 2 version */ __( 'crawler feed: %1$d agents (%2$s)', 'forgemesh-pay-per-crawl' ), $pst['intel_count'], $pst['intel_version'] ) ); ?><?php endif; ?>
+							· <a href="<?php echo esc_url( ! empty( $pst['dashboard'] ) ? $pst['dashboard'] : FMPPC_Pro::BASE . '/wp/dashboard' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'hosted dashboard', 'forgemesh-pay-per-crawl' ); ?></a></p>
+						<?php endif; ?></td></tr>
+					<tr><th><?php esc_html_e( 'Directory', 'forgemesh-pay-per-crawl' ); ?></th><td>
+						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[pro_listed]" value="1" <?php checked( 1, (int) $o['pro_listed'] ); ?>> <?php esc_html_e( 'List this site in the ForgeMesh paid-sites directory when it is in Charge mode (Pro)', 'forgemesh-pay-per-crawl' ); ?></label></td></tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>

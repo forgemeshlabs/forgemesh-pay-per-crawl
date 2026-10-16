@@ -4,7 +4,7 @@ Tags: x402, ai crawlers, bots, paywall, usdc, analytics, gptbot, claudebot
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,6 +19,7 @@ Most of a website's traffic is not human. Search indexers, AI crawlers, LLM "rea
 * **AI crawlers, SEO crawlers and scripts get HTTP 402 Payment Required.** The response carries the x402 challenge (v2 header and v1 body, so every current client can pay) and an MPP challenge. The client pays USDC on Base and retries; the page is served only after the payment is settled on-chain.
 * **You keep 100%.** The payer's USDC goes directly to the wallet you enter. Nothing is held by the plugin, by ForgeMesh, or by anyone else.
 * **Bot analytics in wp-admin.** Who is crawling (by name and class), how often, from how many sources, which paths, what was paid, every settlement with its transaction link. Start in *Monitor* mode and see what the bots would have paid before you charge anything.
+* **Pro (optional, $4.99/month).** A hosted dashboard for up to 5 sites, a Monday digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the paid-sites directory. Everything above works without it.
 * **Discovery built in.** The plugin serves `/.well-known/x402.json`, `/llms.txt` and `/agents.txt` and adds lines to `robots.txt`, so paying agents and x402 indexes find your paid pages.
 
 = How a payment works =
@@ -35,7 +36,9 @@ The plugin makes outbound requests only when a payment is presented, and only to
 * **PayAI facilitator** (default): `https://facilitator.payai.network` — [terms](https://payai.network/terms) · [privacy](https://payai.network/privacy). It receives the payer's signed authorization and the payment terms (your wallet address, amount, the page URL). No visitor data, no site content.
 * Or **any facilitator URL you enter**, including one you run yourself.
 
-The plugin never contacts ForgeMesh. Search-engine verification uses ordinary DNS lookups.
+* **ForgeMesh Pay-per-Crawl Pro** (only after you enter a Pro license key): `https://proxy.forgemesh.io` — [terms](https://proxy.forgemesh.io/terms) · [privacy](https://proxy.forgemesh.io/privacy). The plugin sends your license key, the site's host, name, mode, price and payout wallet, daily per-bot counts (bot name, class, hits, paid, revenue, number of distinct hashed sources) and settlement records (transaction hash, payer wallet, path, amount). No visitor IPs, no page content, no human user agents. It pulls a crawler list from the same service once a day. Without a key the plugin never contacts ForgeMesh.
+
+Search-engine verification uses ordinary DNS lookups.
 
 = Privacy =
 
@@ -83,6 +86,10 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 3. A 402 challenge as a bot sees it.
 
 == Changelog ==
+
+= 0.2.0 =
+* Pro: license key, hourly sync to the hosted dashboard, crawler-intel feed merged into the classifier, directory opt-in.
+* CSV export neutralises formula-leading cells.
 
 = 0.1.0 =
 * First release: classifier with 80+ known agents, x402 v1 and v2 plus MPP challenges, facilitator verify/settle, discovery files, bot analytics, CSV export.

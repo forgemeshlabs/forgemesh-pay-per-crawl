@@ -3,7 +3,7 @@
  * Plugin Name:       ForgeMesh Pay-per-Crawl
  * Plugin URI:        https://forgemesh.io/wordpress
  * Description:       Charge AI crawlers and bots per page with x402 USDC micropayments on Base, paid straight to your wallet. Humans and verified search engines read free. Full bot analytics in wp-admin.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            ForgeMesh Labs
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FMPPC_VERSION', '0.1.0' );
+define( 'FMPPC_VERSION', '0.2.0' );
 define( 'FMPPC_FILE', __FILE__ );
 define( 'FMPPC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FMPPC_URL', plugin_dir_url( __FILE__ ) );
@@ -28,6 +28,7 @@ require_once FMPPC_DIR . 'includes/class-fmppc-x402.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-log.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-gate.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-discovery.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-pro.php';
 
 final class FMPPC {
 
@@ -60,6 +61,8 @@ final class FMPPC {
 			'trust_proxy_header' => '',
 			'retention_days'     => 90,
 			'mpp_secret'         => '',
+			'pro_key'            => '',
+			'pro_listed'         => 1,
 		);
 	}
 
@@ -87,7 +90,11 @@ final class FMPPC {
 
 	public static function boot() {
 		$s = self::settings();
+		if ( FMPPC_Pro::enabled( $s ) ) {
+			add_filter( 'fmppc_catalog', array( 'FMPPC_Pro', 'merge_catalog' ) );
+		}
 		( new FMPPC_Discovery( $s ) )->hooks();
+		( new FMPPC_Pro( $s ) )->hooks();
 		( new FMPPC_Gate( $s ) )->hooks();
 		add_action( 'fmppc_daily', array( __CLASS__, 'daily' ) );
 		if ( is_admin() ) {
@@ -107,6 +114,7 @@ final class FMPPC {
 
 	public static function deactivate() {
 		wp_clear_scheduled_hook( 'fmppc_daily' );
+		FMPPC_Pro::unschedule();
 	}
 
 	public static function daily() {

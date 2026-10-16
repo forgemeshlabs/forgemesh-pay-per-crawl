@@ -27,3 +27,5 @@
 .fmppc .fmppc-badge.fmppc-ok{color:#0b6b2e;font-weight:700}
 .fmppc .fmppc-overrides{max-width:640px;margin-top:8px}
 .fmppc h2{margin-top:28px}
+.fmppc .fmppc-pro{background:#fff;border:1px solid #dcdcde;border-left:4px solid #1e8c3a;border-radius:6px;padding:8px 12px;margin:0 0 12px}
+.fmppc .fmppc-pro-upsell{border-left-color:#8c8f94}

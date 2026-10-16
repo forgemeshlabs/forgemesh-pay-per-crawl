@@ -19,6 +19,8 @@ function wp_remote_retrieve_response_code( $r ) { return $r['code'] ?? 200; }
 require __DIR__ . '/../includes/class-fmppc-keccak.php';
 require __DIR__ . '/../includes/class-fmppc-classifier.php';
 require __DIR__ . '/../includes/class-fmppc-x402.php';
+define( 'FMPPC_DIR', __DIR__ . '/../' );
+require __DIR__ . '/../includes/class-fmppc-pro.php';
 
 $pass = 0; $fail = 0;
 function ok( $cond, $name ) { global $pass, $fail; if ( $cond ) { $pass++; } else { $fail++; echo "FAIL: $name\n"; } }
@@ -126,4 +128,25 @@ $r = $x->verify_and_settle( $p, 'u' );
 ok( 'facilitator_unreachable' === $r['reason'], 'unreachable' );
 
 echo "pass=$pass fail=$fail\n";
+
+// ── Pro: intel merge into the catalog ──
+$GLOBALS['options'] = array();
+function get_option( $k, $d = false ) { return $GLOBALS['options'][ $k ] ?? $d; }
+function update_option( $k, $v, $a = false ) { $GLOBALS['options'][ $k ] = $v; return true; }
+function delete_option( $k ) { unset( $GLOBALS['options'][ $k ] ); }
+function apply_filters( $h, $v ) { return 'fmppc_catalog' === $h ? FMPPC_Pro::merge_catalog( $v ) : $v; }
+function wp_clear_scheduled_hook( $h ) {}
+$pass0 = $pass; $fail0 = $fail;
+$GLOBALS['options']['fmppc_intel'] = array( 'version' => '2026-10-16', 'agents' => array(
+	array( 'name' => 'GPTBot', 'class' => 'ai', 'match' => array( 'gptbot', 'gptbot-next' ), 'verify' => array() ),
+	array( 'name' => 'Brand New Crawler', 'class' => 'seo', 'match' => array( 'brandnewcrawler/' ), 'verify' => array() ),
+) );
+$merged = FMPPC_Pro::merge_catalog( FMPPC_Classifier::shipped() );
+$names  = array_column( $merged, 'name' );
+ok( in_array( 'Brand New Crawler', $names, true ), 'intel appends new agent' );
+ok( count( array_keys( $names, 'GPTBot', true ) ) === 1, 'intel does not duplicate known agent' );
+$g = $merged[ array_search( 'GPTBot', $names, true ) ];
+ok( in_array( 'gptbot-next', $g['match'], true ) && in_array( 'gptbot', $g['match'], true ), 'intel extends match list' );
+ok( FMPPC_Pro::enabled( array( 'pro_key' => 'fmppc_' . str_repeat( 'a', 30 ) ) ) && ! FMPPC_Pro::enabled( array( 'pro_key' => 'nope' ) ), 'pro key shape' );
+echo "pro pass=" . ( $pass - $pass0 ) . " fail=" . ( $fail - $fail0 ) . "\n";
 exit( $fail ? 1 : 0 );

@@ -17,6 +17,19 @@ final class FMPPC_Classifier {
 	 * the operator (search engines publish these); unverifiable claims are demoted.
 	 */
 	public static function catalog() {
+		static $cached = null;
+		if ( null !== $cached ) {
+			return $cached;
+		}
+		$cached = self::shipped();
+		if ( function_exists( 'apply_filters' ) ) {
+			$cached = (array) apply_filters( 'fmppc_catalog', $cached );
+		}
+		return $cached;
+	}
+
+	/** The list that ships with the plugin. */
+	public static function shipped() {
 		return array(
 			// Search engines (free by default; verified by rDNS).
 			array( 'name' => 'Googlebot', 'class' => 'search', 'match' => array( 'googlebot' ), 'verify' => array( '.googlebot.com', '.google.com' ) ),
