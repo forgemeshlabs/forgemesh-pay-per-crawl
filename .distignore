@@ -1,0 +1,7 @@
+.git
+.gitignore
+.distignore
+tests
+docs
+*.zip
+node_modules

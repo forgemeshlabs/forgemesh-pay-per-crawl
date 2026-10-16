@@ -1,0 +1,29 @@
+.fmppc .fmppc-range{display:flex;gap:6px;align-items:center;margin:12px 0}
+.fmppc .fmppc-mode{margin-left:auto;padding:4px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.fmppc .fmppc-mode-gate{background:#d1f0dc;color:#0b6b2e}
+.fmppc .fmppc-mode-monitor{background:#fff3cd;color:#7a5200}
+.fmppc .fmppc-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0 24px}
+.fmppc .fmppc-tile{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:14px 16px}
+.fmppc .fmppc-tile span{display:block;color:#646970;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.fmppc .fmppc-tile strong{display:block;font-size:28px;line-height:1.2;margin:4px 0}
+.fmppc .fmppc-tile em{font-style:normal;color:#646970;font-size:12px}
+.fmppc .fmppc-tile-rev strong{color:#0b6b2e}
+.fmppc .fmppc-chart{display:flex;align-items:flex-end;gap:4px;height:160px;background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 12px 28px;margin-bottom:24px;overflow-x:auto}
+.fmppc .fmppc-bar{position:relative;flex:1 0 14px;min-width:14px;height:100%;display:flex;align-items:flex-end}
+.fmppc .fmppc-bar-fill{width:100%;background:#8c8f94;border-radius:2px 2px 0 0;min-height:1px}
+.fmppc .fmppc-bar-paid{position:absolute;left:0;bottom:0;width:100%;background:#1e8c3a;border-radius:2px 2px 0 0}
+.fmppc .fmppc-bar label{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:10px;color:#646970;white-space:nowrap}
+.fmppc .fmppc-cols{display:grid;grid-template-columns:3fr 2fr;gap:24px}
+@media (max-width:1100px){.fmppc .fmppc-cols{grid-template-columns:1fr}}
+.fmppc .fmppc-class,.fmppc .fmppc-status{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;background:#f0f0f1;color:#1d2327}
+.fmppc .fmppc-class-ai{background:#e7e0ff;color:#3b1d8f}
+.fmppc .fmppc-class-search{background:#d9ecff;color:#0a4a8a}
+.fmppc .fmppc-class-seo{background:#ffe6d5;color:#8a3a00}
+.fmppc .fmppc-class-automation,.fmppc .fmppc-class-bot{background:#f6e3e3;color:#8a1f1f}
+.fmppc .fmppc-class-social,.fmppc .fmppc-class-monitor{background:#e6f4ea;color:#1e5a2d}
+.fmppc .fmppc-status-paid{background:#d1f0dc;color:#0b6b2e}
+.fmppc .fmppc-status-unpaid,.fmppc .fmppc-status-monitor{background:#fff3cd;color:#7a5200}
+.fmppc .fmppc-status-rejected,.fmppc .fmppc-status-settle_failed,.fmppc .fmppc-status-blocked{background:#f6e3e3;color:#8a1f1f}
+.fmppc .fmppc-badge.fmppc-ok{color:#0b6b2e;font-weight:700}
+.fmppc .fmppc-overrides{max-width:640px;margin-top:8px}
+.fmppc h2{margin-top:28px}
