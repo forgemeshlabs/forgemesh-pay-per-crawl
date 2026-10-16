@@ -367,9 +367,15 @@ final class FMPPC_Admin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="pay-per-crawl-' . $days . 'd.csv"' );
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		// Bot names, paths and user agents are chosen by the requester: neutralise formula-leading
+		// cells so a UA like "=HYPERLINK(...)" cannot execute when the CSV opens in a spreadsheet.
+		$safe = function ( $v ) {
+			$v = (string) $v;
+			return ( '' !== $v && in_array( $v[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) ? "'" . $v : $v;
+		};
 		fputcsv( $out, array( 'ts', 'class', 'bot', 'verified', 'method', 'path', 'status', 'rail', 'amount_usd', 'tx_hash', 'payer', 'reason', 'source_hash', 'user_agent' ) );
 		foreach ( $rows as $r ) {
-			fputcsv( $out, array( $r['ts'], $r['ua_class'], $r['bot_name'], $r['verified'], $r['method'], $r['path'], $r['status'], $r['rail'], FMPPC_X402::units_to_usd( $r['amount_units'] ), $r['tx_hash'], $r['payer'], $r['reason'], $r['ip_hash'], $r['ua'] ) );
+			fputcsv( $out, array_map( $safe, array( $r['ts'], $r['ua_class'], $r['bot_name'], $r['verified'], $r['method'], $r['path'], $r['status'], $r['rail'], FMPPC_X402::units_to_usd( $r['amount_units'] ), $r['tx_hash'], $r['payer'], $r['reason'], $r['ip_hash'], $r['ua'] ) ) );
 		}
 		exit;
 	}
