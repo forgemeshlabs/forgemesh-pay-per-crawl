@@ -350,7 +350,7 @@ final class FMPPC_Admin {
 			<hr>
 			<h2><?php esc_html_e( 'Get listed', 'forgemesh-pay-per-crawl' ); ?></h2>
 			<p><?php esc_html_e( 'x402 indexes pick this site up from its manifest once a first payment settles. To be listed sooner, submit the site to the ForgeMesh x402 Verified index (free by pull request, or a $0.05 paid submit).', 'forgemesh-pay-per-crawl' ); ?>
-			<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( 'https://forgemesh.io/verified?submit=' . rawurlencode( home_url( '/' ) ) ); ?>"><?php esc_html_e( 'List on ForgeMesh', 'forgemesh-pay-per-crawl' ); ?></a></p>
+			<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( 'https://forgemesh.io/verified/claim?src=wordpress&host=' . rawurlencode( wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) ); ?>"><?php esc_html_e( 'List on ForgeMesh', 'forgemesh-pay-per-crawl' ); ?></a></p>
 			<p class="description"><?php esc_html_e( 'The plugin itself never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented.', 'forgemesh-pay-per-crawl' ); ?></p>
 		</div>
 		<?php
