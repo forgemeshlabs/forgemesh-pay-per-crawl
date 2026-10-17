@@ -102,15 +102,14 @@ final class FMPPC_Pro {
 		if ( empty( $st['ok'] ) ) {
 			return;
 		}
-		$t     = FMPPC_Log::table();
 		$days  = array( gmdate( 'Y-m-d', time() - DAY_IN_SECONDS ), gmdate( 'Y-m-d' ) );
 		$daily = array();
 		foreach ( $days as $day ) {
-			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT bot_name, ua_class, COUNT(*) hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected' OR status='settle_failed') rejected, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, SUM(CASE WHEN status='monitor' THEN amount_units ELSE 0 END) would_units, COUNT(DISTINCT ip_hash) sources FROM $t WHERE DATE(ts) = %s GROUP BY bot_name, ua_class ORDER BY hits DESC LIMIT 500", $day ), ARRAY_A ); // phpcs:ignore WordPress.DB
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT bot_name, ua_class, COUNT(*) hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected' OR status='settle_failed') rejected, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, SUM(CASE WHEN status='monitor' THEN amount_units ELSE 0 END) would_units, COUNT(DISTINCT ip_hash) sources FROM {$wpdb->prefix}fmppc_hits WHERE DATE(ts) = %s GROUP BY bot_name, ua_class ORDER BY hits DESC LIMIT 500", $day ), ARRAY_A ); // phpcs:ignore WordPress.DB
 			$daily[] = array( 'day' => $day, 'rows' => array_map( function ( $r ) { return array_map( 'intval', $r ) + array( 'bot_name' => $r['bot_name'], 'ua_class' => $r['ua_class'] ); }, (array) $rows ) );
 		}
 		$last_id     = (int) ( $st['last_settlement_id'] ?? 0 );
-		$settlements = $wpdb->get_results( $wpdb->prepare( "SELECT id, ts, bot_name, ua_class, path, rail, amount_units, tx_hash, payer FROM $t WHERE status='paid' AND id > %d ORDER BY id ASC LIMIT 1000", $last_id ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		$settlements = $wpdb->get_results( $wpdb->prepare( "SELECT id, ts, bot_name, ua_class, path, rail, amount_units, tx_hash, payer FROM {$wpdb->prefix}fmppc_hits WHERE status='paid' AND id > %d ORDER BY id ASC LIMIT 1000", $last_id ), ARRAY_A ); // phpcs:ignore WordPress.DB
 		$payload     = array(
 			'site'        => array(
 				'host'           => wp_parse_url( home_url(), PHP_URL_HOST ),
