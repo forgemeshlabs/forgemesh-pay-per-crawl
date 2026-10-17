@@ -4,7 +4,7 @@ Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 3. A 402 challenge as a bot sees it.
 
 == Changelog ==
+
+= 0.2.2 =
+* Security: exempt-path matching is anchored. Look-alike paths (/robots.txt.x, /sitemapfoo, /.well-known/../post, an allow path /pricing matching /pricing-secret) no longer bypass the paywall; dot segments and %2e / %2f paths are gated.
 
 = 0.2.1 =
 * Security: with a multi-value client-IP header (X-Forwarded-For), use the right-most address so a crawler cannot prepend a search-engine IP and bypass the paywall.

@@ -56,15 +56,46 @@ final class FMPPC_Gate {
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST && empty( $this->s['gate_rest'] ) ) {
 			return true;
 		}
-		$path = $this->path();
-		foreach ( array( '/wp-login.php', '/wp-admin', '/xmlrpc.php', '/robots.txt', '/llms.txt', '/agents.txt', '/.well-known/', '/favicon.ico', '/wp-cron.php', '/sitemap' ) as $p ) {
-			if ( 0 === strpos( $path, $p ) ) {
-				return true;
+		return self::path_is_free( $this->path(), (array) $this->s['allow_paths'] );
+	}
+
+	/**
+	 * Anchored exemption check. Exact files, root-level sitemap .xml files, /.well-known/ and /wp-admin
+	 * directories and allow paths (path-segment boundary, so /pricing never matches /pricing-secret).
+	 * Dot segments, doubled slashes and %2e / %2f in the raw path are never exempt.
+	 *
+	 * @param string $raw   Raw request path.
+	 * @param array  $allow Admin-configured allow paths.
+	 * @return bool
+	 */
+	public static function path_is_free( $raw, array $allow = array() ) {
+		$raw = (string) $raw;
+		if ( '' === $raw || '/' !== $raw[0] || preg_match( '/%2[ef]/i', $raw ) ) {
+			return false;
+		}
+		$out = array();
+		foreach ( array_slice( explode( '/', $raw ), 1 ) as $seg ) {
+			if ( '..' === $seg ) {
+				array_pop( $out );
+			} elseif ( '.' !== $seg ) {
+				$out[] = $seg;
 			}
 		}
-		foreach ( (array) $this->s['allow_paths'] as $p ) {
+		$norm = '/' . implode( '/', $out );
+		if ( rtrim( $norm, '/' ) !== rtrim( $raw, '/' ) ) {
+			return false;
+		}
+		if ( in_array( $norm, array( '/robots.txt', '/llms.txt', '/agents.txt', '/favicon.ico', '/wp-login.php', '/xmlrpc.php', '/wp-cron.php', '/.well-known', '/wp-admin' ), true )
+			|| preg_match( '#^/[a-z0-9_-]*sitemap[a-z0-9_-]*\.xml$#', $norm )
+			|| 0 === strpos( $norm, '/.well-known/' ) || 0 === strpos( $norm, '/wp-admin/' ) ) {
+			return true;
+		}
+		foreach ( $allow as $p ) {
 			$p = trim( (string) $p );
-			if ( '' !== $p && 0 === strpos( $path, $p ) ) {
+			if ( '' === $p ) {
+				continue;
+			}
+			if ( '/' === substr( $p, -1 ) ? 0 === strpos( $norm, $p ) : ( $norm === $p || 0 === strpos( $norm, $p . '/' ) ) ) {
 				return true;
 			}
 		}

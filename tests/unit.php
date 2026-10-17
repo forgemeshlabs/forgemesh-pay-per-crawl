@@ -148,5 +148,23 @@ ok( count( array_keys( $names, 'GPTBot', true ) ) === 1, 'intel does not duplica
 $g = $merged[ array_search( 'GPTBot', $names, true ) ];
 ok( in_array( 'gptbot-next', $g['match'], true ) && in_array( 'gptbot', $g['match'], true ), 'intel extends match list' );
 ok( FMPPC_Pro::enabled( array( 'pro_key' => 'fmppc_' . str_repeat( 'a', 30 ) ) ) && ! FMPPC_Pro::enabled( array( 'pro_key' => 'nope' ) ), 'pro key shape' );
+// gate exemptions
+require __DIR__ . '/../includes/class-fmppc-gate.php';
+$pass1 = $pass; $fail1 = $fail;
+$cases = array(
+	'/robots.txt' => true, '/robots.txt.html' => false, '/robots.txt.anything' => false,
+	'/llms.txt' => true, '/llms.txtx' => false, '/agents.txt' => true, '/favicon.ico' => true,
+	'/sitemap.xml' => true, '/wp-sitemap.xml' => true, '/wp-sitemap-posts-post-1.xml' => true, '/sitemap_index.xml' => true, '/post-sitemap.xml' => true,
+	'/sitemapfoo' => false, '/sitemap.xml/x' => false, '/a/sitemap.xml' => false,
+	'/.well-known/x402.json' => true, '/.well-known/../post' => false, '/.well-known/%2e%2e/post' => false, '/.well-known/%2E%2E/post' => false, '/foo%2fbar' => false,
+	'/wp-login.php' => true, '/wp-login.phpx' => false, '/wp-admin/' => true, '/wp-admin/admin-ajax.php' => true, '/wp-adminx' => false, '/xmlrpc.php' => true, '/xmlrpc.php/x' => false, '/wp-cron.php' => true,
+	'/pricing' => true, '/pricing/' => true, '/pricing/plans' => true, '/pricing-secret' => false,
+	'//robots.txt' => false, '/post' => false, '/' => false,
+);
+foreach ( $cases as $path => $want ) {
+	ok( FMPPC_Gate::path_is_free( $path, array( '/pricing' ) ) === $want, 'exempt ' . $path );
+}
+ok( FMPPC_Gate::path_is_free( '/docs/a', array( '/docs/' ) ) && ! FMPPC_Gate::path_is_free( '/docs', array( '/docs/' ) ) && ! FMPPC_Gate::path_is_free( '/docsx', array( '/docs/' ) ), 'trailing-slash allow path' );
+echo "gate exempt pass=" . ( $pass - $pass1 ) . " fail=" . ( $fail - $fail1 ) . "\n";
 echo "pro pass=" . ( $pass - $pass0 ) . " fail=" . ( $fail - $fail0 ) . "\n";
 exit( $fail ? 1 : 0 );
