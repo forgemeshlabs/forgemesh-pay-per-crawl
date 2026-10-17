@@ -85,8 +85,7 @@ final class FMPPC_Log {
 	public static function prune( $days ) {
 		global $wpdb;
 		$days = max( 1, (int) $days );
-		$t    = self::table();
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $t WHERE ts < DATE_SUB(UTC_TIMESTAMP(), INTERVAL %d DAY)", $days ) ); // phpcs:ignore WordPress.DB
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}fmppc_hits WHERE ts < DATE_SUB(UTC_TIMESTAMP(), INTERVAL %d DAY)", $days ) ); // phpcs:ignore WordPress.DB
 	}
 
 	// ── Rollups ─────────────────────────────────────────────────────────────
@@ -97,50 +96,42 @@ final class FMPPC_Log {
 
 	public static function totals( $days ) {
 		global $wpdb;
-		$t = self::table();
-		$r = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) hits, SUM(ua_class <> 'human') bot_hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected') rejected, SUM(status='blocked') blocked, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, COUNT(DISTINCT CASE WHEN ua_class <> 'human' THEN ip_hash END) bot_sources FROM $t WHERE ts >= %s", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		$r = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) hits, SUM(ua_class <> 'human') bot_hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected') rejected, SUM(status='blocked') blocked, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, COUNT(DISTINCT CASE WHEN ua_class <> 'human' THEN ip_hash END) bot_sources FROM {$wpdb->prefix}fmppc_hits WHERE ts >= %s", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
 		return array_map( 'intval', (array) $r );
 	}
 
 	public static function by_bot( $days, $limit = 50 ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT bot_name, ua_class, MAX(verified) verified, COUNT(*) hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected') rejected, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, COUNT(DISTINCT ip_hash) sources, MAX(ts) last_seen FROM $t WHERE ua_class <> 'human' AND ts >= %s GROUP BY bot_name, ua_class ORDER BY hits DESC LIMIT %d", self::since( $days ), $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT bot_name, ua_class, MAX(verified) verified, COUNT(*) hits, SUM(status='paid') paid, SUM(status='unpaid') unpaid, SUM(status='rejected') rejected, SUM(status='monitor') monitor, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units, COUNT(DISTINCT ip_hash) sources, MAX(ts) last_seen FROM {$wpdb->prefix}fmppc_hits WHERE ua_class <> 'human' AND ts >= %s GROUP BY bot_name, ua_class ORDER BY hits DESC LIMIT %d", self::since( $days ), $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function by_class( $days ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT ua_class, COUNT(*) hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM $t WHERE ts >= %s GROUP BY ua_class ORDER BY hits DESC", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT ua_class, COUNT(*) hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM {$wpdb->prefix}fmppc_hits WHERE ts >= %s GROUP BY ua_class ORDER BY hits DESC", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function top_paths( $days, $limit = 20 ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT path, COUNT(*) hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM $t WHERE ua_class <> 'human' AND ts >= %s GROUP BY path ORDER BY hits DESC LIMIT %d", self::since( $days ), $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT path, COUNT(*) hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM {$wpdb->prefix}fmppc_hits WHERE ua_class <> 'human' AND ts >= %s GROUP BY path ORDER BY hits DESC LIMIT %d", self::since( $days ), $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function daily( $days ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT DATE(ts) day, SUM(ua_class <> 'human') bot_hits, SUM(ua_class = 'human') human_hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM $t WHERE ts >= %s GROUP BY DATE(ts) ORDER BY day ASC", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT DATE(ts) day, SUM(ua_class <> 'human') bot_hits, SUM(ua_class = 'human') human_hits, SUM(status='paid') paid, SUM(CASE WHEN status='paid' THEN amount_units ELSE 0 END) revenue_units FROM {$wpdb->prefix}fmppc_hits WHERE ts >= %s GROUP BY DATE(ts) ORDER BY day ASC", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function settlements( $limit = 50 ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, bot_name, ua_class, path, rail, amount_units, tx_hash, payer FROM $t WHERE status = 'paid' ORDER BY ts DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, bot_name, ua_class, path, rail, amount_units, tx_hash, payer FROM {$wpdb->prefix}fmppc_hits WHERE status = 'paid' ORDER BY ts DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function recent( $limit = 100 ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, ua_class, bot_name, verified, method, path, status, rail, amount_units, tx_hash, reason FROM $t WHERE ua_class <> 'human' ORDER BY ts DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, ua_class, bot_name, verified, method, path, status, rail, amount_units, tx_hash, reason FROM {$wpdb->prefix}fmppc_hits WHERE ua_class <> 'human' ORDER BY ts DESC LIMIT %d", $limit ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 
 	public static function export_rows( $days ) {
 		global $wpdb;
-		$t = self::table();
-		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, ua_class, bot_name, verified, method, path, status, rail, amount_units, tx_hash, payer, reason, ip_hash, ua FROM $t WHERE ts >= %s ORDER BY ts DESC LIMIT 50000", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
+		return $wpdb->get_results( $wpdb->prepare( "SELECT ts, ua_class, bot_name, verified, method, path, status, rail, amount_units, tx_hash, payer, reason, ip_hash, ua FROM {$wpdb->prefix}fmppc_hits WHERE ts >= %s ORDER BY ts DESC LIMIT 50000", self::since( $days ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
 	}
 }

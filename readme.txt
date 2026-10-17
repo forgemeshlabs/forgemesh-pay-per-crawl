@@ -1,6 +1,6 @@
 === ForgeMesh Pay-per-Crawl ===
 Contributors: forgemeshlabs
-Tags: x402, ai crawlers, bots, paywall, usdc, analytics, gptbot, claudebot
+Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4

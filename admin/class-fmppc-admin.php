@@ -160,8 +160,7 @@ final class FMPPC_Admin {
 		$recent = FMPPC_Log::recent( 40 );
 		$would  = 0;
 		global $wpdb;
-		$tbl   = FMPPC_Log::table();
-		$would = (int) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount_units) FROM $tbl WHERE status='monitor' AND ts >= %s", gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB
+		$would = (int) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount_units) FROM {$wpdb->prefix}fmppc_hits WHERE status='monitor' AND ts >= %s", gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB
 		$max   = 1;
 		foreach ( $daily as $d ) {
 			$max = max( $max, (int) $d['bot_hits'] );

@@ -236,7 +236,7 @@ final class FMPPC_Gate {
 			}
 		}
 		if ( isset( $_SERVER['CONTENT_TYPE'] ) ) {
-			$out['content-type'] = (string) $_SERVER['CONTENT_TYPE'];
+			$out['content-type'] = sanitize_text_field( wp_unslash( $_SERVER['CONTENT_TYPE'] ) );
 		}
 		if ( empty( $out['authorization'] ) && function_exists( 'apache_request_headers' ) ) {
 			$a = apache_request_headers();
