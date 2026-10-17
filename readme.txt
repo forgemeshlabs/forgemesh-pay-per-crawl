@@ -4,7 +4,7 @@ Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,7 +51,7 @@ Visitor IP addresses are never stored. Bot sources are counted by a daily-salted
 3. Watch **Pay-per-Crawl → Bot analytics** for a day or two in Monitor mode.
 4. Switch the mode to **Charge**.
 
-If your site is behind Cloudflare or another proxy, set the *Client IP header* so search-engine verification sees the real client address.
+If your site is behind Cloudflare or another proxy, set the *Client IP header* so search-engine verification sees the real client address. Choose a header your proxy sets itself (CF-Connecting-IP, X-Real-IP, True-Client-IP); with X-Forwarded-For the plugin uses the right-most address, the one your proxy appended.
 
 == Frequently Asked Questions ==
 
@@ -86,6 +86,9 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 3. A 402 challenge as a bot sees it.
 
 == Changelog ==
+
+= 0.2.1 =
+* Security: with a multi-value client-IP header (X-Forwarded-For), use the right-most address so a crawler cannot prepend a search-engine IP and bypass the paywall.
 
 = 0.2.0 =
 * Pro: license key, hourly sync to the hosted dashboard, crawler-intel feed merged into the classifier, directory opt-in.

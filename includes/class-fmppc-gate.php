@@ -255,9 +255,12 @@ final class FMPPC_Gate {
 		if ( ! empty( $this->s['trust_proxy_header'] ) ) {
 			$hdr = 'HTTP_' . strtoupper( str_replace( '-', '_', $this->s['trust_proxy_header'] ) );
 			if ( ! empty( $_SERVER[ $hdr ] ) ) {
-				$first = trim( explode( ',', (string) $_SERVER[ $hdr ] )[0] ); // phpcs:ignore
-				if ( filter_var( $first, FILTER_VALIDATE_IP ) ) {
-					$ip = $first;
+				// Multi-value forwarding headers grow on the LEFT with client-supplied values;
+				// the right-most entry is the one appended by the proxy in front of us.
+				$parts = array_values( array_filter( array_map( 'trim', explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $hdr ] ) ) ) ) ) );
+				$last  = $parts ? end( $parts ) : '';
+				if ( filter_var( $last, FILTER_VALIDATE_IP ) ) {
+					$ip = $last;
 				}
 			}
 		}
