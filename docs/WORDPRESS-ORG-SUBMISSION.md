@@ -30,8 +30,8 @@ https://wordpress.org/plugins/developers/add/
 - Direct DB queries are prepared and carry `phpcs:ignore` comments; reviewers accept this for a
   custom table.
 
-## 4. After approval
-They email SVN access. Release flow:
+## 4. After approval (APPROVED 2026-10-20; SVN user forgemeshlabs)
+Release flow = `./svn-release.sh` (rsync trunk, assets from docs/wporg-assets, tag, commit; prompts for the SVN password). Manual equivalent:
 ```
 svn co https://plugins.svn.wordpress.org/forgemesh-pay-per-crawl wp-svn
 rsync -a --exclude-from=.distignore ./ wp-svn/trunk/
