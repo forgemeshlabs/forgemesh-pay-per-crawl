@@ -29,6 +29,7 @@ require_once FMPPC_DIR . 'includes/class-fmppc-log.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-gate.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-discovery.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-pro.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-audit.php';
 
 final class FMPPC {
 
@@ -99,7 +100,9 @@ final class FMPPC {
 		add_action( 'fmppc_daily', array( __CLASS__, 'daily' ) );
 		if ( is_admin() ) {
 			require_once FMPPC_DIR . 'admin/class-fmppc-admin.php';
+			require_once FMPPC_DIR . 'admin/class-fmppc-audit-page.php';
 			( new FMPPC_Admin() )->hooks();
+			( new FMPPC_Audit_Page() )->hooks();
 		}
 	}
 

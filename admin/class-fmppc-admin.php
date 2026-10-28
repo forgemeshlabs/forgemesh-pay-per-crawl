@@ -29,6 +29,7 @@ final class FMPPC_Admin {
 		add_menu_page( __( 'Pay-per-Crawl', 'forgemesh-pay-per-crawl' ), __( 'Pay-per-Crawl', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc', array( $this, 'dashboard' ), 'dashicons-money-alt', 81 );
 		add_submenu_page( 'fmppc', __( 'Bot analytics', 'forgemesh-pay-per-crawl' ), __( 'Bot analytics', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc', array( $this, 'dashboard' ) );
 		add_submenu_page( 'fmppc', __( 'Settings', 'forgemesh-pay-per-crawl' ), __( 'Settings', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc-settings', array( $this, 'settings_page' ) );
+		add_submenu_page( 'fmppc', __( 'AI Crawler Audit', 'forgemesh-pay-per-crawl' ), __( 'Audit', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc-audit', array( new FMPPC_Audit_Page(), 'page' ) );
 	}
 
 	public function assets( $hook ) {

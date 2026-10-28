@@ -36,3 +36,18 @@
 .fmppc h2{margin-top:28px}
 .fmppc .fmppc-pro{background:#fff;border:1px solid #dcdcde;border-left:4px solid #1e8c3a;border-radius:6px;padding:8px 12px;margin:0 0 12px}
 .fmppc .fmppc-pro-upsell{border-left-color:#8c8f94}
+
+/* AI Crawler Audit */
+.fmppc-audit .fmppc-audit-host{font-size:14px;color:#646970;font-weight:400;margin-left:8px}
+.fmppc-audit .fmppc-audit-lock{background:#fff;border:1px solid #dcdcde;border-left:4px solid #2271b1;border-radius:6px;padding:16px 20px;margin:20px 0}
+.fmppc-audit .fmppc-audit-lock ul{list-style:disc;margin-left:1.2em}
+.fmppc-audit .fmppc-audit-price{font-size:13px;color:#1e8c3a;font-weight:600;margin-left:8px}
+.fmppc-audit .fmppc-audit-tokenform{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fmppc-audit .fmppc-blur{color:#8c8f94;font-style:italic}
+.fmppc-audit .fmppc-audit-op{background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;margin:12px 0}
+.fmppc-audit .fmppc-audit-op h3{margin:0 0 6px}
+.fmppc-audit .fmppc-audit-n{font-size:12px;color:#646970;font-weight:400;margin-left:8px}
+.fmppc-audit .fmppc-digest{word-break:break-all}
+.fmppc-audit .fmppc-audit-notice textarea{width:100%;max-width:800px;font-family:monospace;font-size:12px}
+.fmppc-audit .fmppc-audit-classes{max-width:600px;margin:12px 0}
+@media print{#adminmenumain,#wpadminbar,#wpfooter,.fmppc-noprint,.notice,.fmppc-audit-tokenform,.update-nag{display:none!important}#wpcontent{margin-left:0}.fmppc-audit .fmppc-audit-op,.fmppc-audit .fmppc-audit-lock{break-inside:avoid;border-color:#999}.fmppc-audit details{display:block}.fmppc-audit details>*{display:block}}
