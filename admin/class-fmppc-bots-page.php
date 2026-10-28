@@ -78,6 +78,8 @@ final class FMPPC_Bots_Page {
 			$row['hits']       = isset( $seen[ $name ] ) ? (int) $seen[ $name ]['hits'] : 0;
 			$row['paid']       = isset( $seen[ $name ] ) ? (int) $seen[ $name ]['paid'] : 0;
 			$row['last_seen']  = isset( $seen[ $name ] ) ? $seen[ $name ]['last_seen'] : '';
+			// A search-engine name seen under another class means the claim failed verification.
+			$row['impostor']   = isset( $seen[ $name ] ) && 'search' === $row['class'] && 'search' !== $seen[ $name ]['ua_class'];
 			$row['policy']     = self::policy( $s, $row );
 		}
 		unset( $row );
@@ -181,7 +183,7 @@ final class FMPPC_Bots_Page {
 							<dl>
 								<?php if ( '' !== $b['robots'] ) : ?><dt>robots.txt</dt><dd><code>User-agent: <?php echo esc_html( $b['robots'] ); ?></code></dd><?php endif; ?>
 								<?php if ( '' !== $b['verify'] ) : ?><dt><?php esc_html_e( 'Verified by', 'forgemesh-pay-per-crawl' ); ?></dt><dd><?php echo esc_html( sprintf( /* translators: suffixes */ __( 'reverse DNS ending %s', 'forgemesh-pay-per-crawl' ), $b['verify'] ) ); ?></dd><?php endif; ?>
-								<dt><?php esc_html_e( 'On this site', 'forgemesh-pay-per-crawl' ); ?></dt><dd><?php echo $b['hits'] ? esc_html( sprintf( /* translators: 1 hits, 2 paid, 3 last seen */ __( '%1$s fetches, %2$s paid, last %3$s', 'forgemesh-pay-per-crawl' ), number_format_i18n( $b['hits'] ), number_format_i18n( $b['paid'] ), $b['last_seen'] ? human_time_diff( strtotime( $b['last_seen'] . ' UTC' ) ) . ' ' . __( 'ago', 'forgemesh-pay-per-crawl' ) : '' ) ) : esc_html__( 'not seen yet', 'forgemesh-pay-per-crawl' ); ?></dd>
+								<dt><?php esc_html_e( 'On this site', 'forgemesh-pay-per-crawl' ); ?></dt><dd><?php echo $b['hits'] ? esc_html( sprintf( /* translators: 1 hits, 2 paid, 3 last seen */ __( '%1$s fetches, %2$s paid, last %3$s', 'forgemesh-pay-per-crawl' ), number_format_i18n( $b['hits'] ), number_format_i18n( $b['paid'] ), $b['last_seen'] ? human_time_diff( strtotime( $b['last_seen'] . ' UTC' ) ) . ' ' . __( 'ago', 'forgemesh-pay-per-crawl' ) : '' ) ) : esc_html__( 'not seen yet', 'forgemesh-pay-per-crawl' ); ?><?php if ( ! empty( $b['impostor'] ) ) : ?> <span class="fmppc-tag fmppc-tag-block"><?php esc_html_e( 'impostor: failed verification, treated as a script', 'forgemesh-pay-per-crawl' ); ?></span><?php endif; ?></dd>
 								<?php if ( '' !== $b['docs'] ) : ?><dt><?php esc_html_e( 'Docs', 'forgemesh-pay-per-crawl' ); ?></dt><dd><a href="<?php echo esc_url( $b['docs'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_parse_url( $b['docs'], PHP_URL_HOST ) ); ?></a></dd><?php endif; ?>
 							</dl>
 						</article>
