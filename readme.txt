@@ -87,6 +87,9 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 1. Bot analytics: hits per day, who is crawling, paid fetches and revenue.
 2. Settings: wallet, price, mode, and which classes pay.
 3. A 402 challenge as a bot sees it.
+4. Bot directory: every known crawler grouped by purpose, searchable, with who runs it, its robots.txt token, verification and what your site does with it.
+5. Pricing rules (Pro): charge, free or block by post type, category, path, bot name, purpose or class, each with its own price.
+6. AI Crawler Audit: summary of operators, bandwidth and value, with the one-time unlock for the full report.
 
 == Changelog ==
 
