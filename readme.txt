@@ -4,7 +4,7 @@ Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ The plugin makes outbound requests only when a payment is presented, and only to
 * **PayAI facilitator** (default): `https://facilitator.payai.network` — [terms](https://payai.network/terms) · [privacy](https://payai.network/privacy). It receives the payer's signed authorization and the payment terms (your wallet address, amount, the page URL). No visitor data, no site content.
 * Or **any facilitator URL you enter**, including one you run yourself.
 
-* **ForgeMesh Pay-per-Crawl Pro** (only after you enter a Pro license key): `https://proxy.forgemesh.io` — [terms](https://proxy.forgemesh.io/terms) · [privacy](https://proxy.forgemesh.io/privacy). The plugin sends your license key, the site's host, name, mode, price and payout wallet, daily per-bot counts (bot name, class, hits, paid, revenue, number of distinct hashed sources) and settlement records (transaction hash, payer wallet, path, amount). No visitor IPs, no page content, no human user agents. It pulls a crawler list from the same service once a day. Without a key the plugin never contacts ForgeMesh.
+* **ForgeMesh Pay-per-Crawl Pro** (only after you enter a Pro license key): `https://proxy.forgemesh.io` — [terms](https://proxy.forgemesh.io/terms) · [privacy](https://proxy.forgemesh.io/privacy). The plugin sends your license key, the site's host, name, mode, price and payout wallet, daily per-bot counts (bot name, class, hits, paid, revenue, number of distinct hashed sources) and settlement records (transaction hash, payer wallet, path, amount). No visitor IPs, no page content, no human user agents. It pulls a crawler list from the same service once a day. Without a Pro key the plugin never contacts ForgeMesh.
 
 Search-engine verification uses ordinary DNS lookups.
 
@@ -86,6 +86,11 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 3. A 402 challenge as a bot sees it.
 
 == Changelog ==
+
+= 0.2.3 =
+* Settings: plain-language descriptions for the Client IP header (what each header is, who sets it, why verification depends on it) and the facilitator Authorization header; warns when the site is behind a proxy but no header is selected, or the selected header is absent.
+* Analytics: shows how many agents the built-in bot list knows and when it was last revised; Pro shows when the crawler feed last refreshed.
+* Wording: "Without a Pro key the plugin never contacts ForgeMesh."
 
 = 0.2.2 =
 * Security: exempt-path matching is anchored. Look-alike paths (/robots.txt.x, /sitemapfoo, /.well-known/../post, an allow path /pricing matching /pricing-secret) no longer bypass the paywall; dot segments and %2e / %2f paths are gated.

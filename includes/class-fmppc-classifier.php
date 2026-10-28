@@ -16,6 +16,9 @@ final class FMPPC_Classifier {
 	 * substrings of the User-Agent. `verify` lists reverse-DNS suffixes that prove
 	 * the operator (search engines publish these); unverifiable claims are demoted.
 	 */
+	/** Date the shipped list below was last revised (shown on the analytics page). */
+	const SHIPPED_AT = '2026-10-16';
+
 	public static function catalog() {
 		static $cached = null;
 		if ( null !== $cached ) {

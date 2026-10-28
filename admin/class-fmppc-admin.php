@@ -180,6 +180,7 @@ final class FMPPC_Admin {
 			<?php $pst = FMPPC_Pro::state(); if ( FMPPC_Pro::enabled( $s ) ) : ?>
 				<p class="fmppc-pro"><?php echo ! empty( $pst['ok'] ) ? '<strong>Pro</strong> ' . esc_html__( 'active', 'forgemesh-pay-per-crawl' ) : '<strong>Pro</strong> ' . esc_html( (string) ( $pst['status'] ?? 'pending' ) ); ?> · <a href="<?php echo esc_url( ! empty( $pst['dashboard'] ) ? $pst['dashboard'] : FMPPC_Pro::BASE . '/wp/dashboard' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open hosted dashboard', 'forgemesh-pay-per-crawl' ); ?></a><?php if ( ! empty( $pst['synced_at'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: time ago */ __( 'synced %s ago', 'forgemesh-pay-per-crawl' ), human_time_diff( (int) $pst['synced_at'] ) ) ); ?><?php endif; ?></p>
 			<?php else : ?>
+				<p class="fmppc-catalog description"><?php echo esc_html( sprintf( /* translators: 1 count, 2 date */ __( 'Bot list: %1$d known agents, built in on %2$s. New AI crawlers appear every few weeks; until this plugin is updated they are classified by their generic user agent instead of by name. Pro refreshes the list daily.', 'forgemesh-pay-per-crawl' ), count( FMPPC_Classifier::shipped() ), FMPPC_Classifier::SHIPPED_AT ) ); ?></p>
 				<p class="fmppc-pro fmppc-pro-upsell"><?php esc_html_e( 'Want all your sites in one place, a Monday digest, paywall alerts and a bot list that updates itself?', 'forgemesh-pay-per-crawl' ); ?> <a href="<?php echo esc_url( FMPPC_Pro::BASE . '/wp?utm_source=plugin' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Pro is $4.99/month', 'forgemesh-pay-per-crawl' ); ?></a></p>
 			<?php endif; ?>
 			<div class="fmppc-tiles">
@@ -356,7 +357,27 @@ final class FMPPC_Admin {
 								<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $k, $o['trust_proxy_header'] ); ?>><?php echo esc_html( $lbl ); ?></option>
 							<?php endforeach; ?>
 						</select>
-						<p class="description"><?php esc_html_e( 'Only set this if your site sits behind a proxy or CDN that sets the header; it is used for search-engine verification and source counting.', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>
+						<?php
+						$seen_hdrs = array();
+						foreach ( array( 'cf-connecting-ip' => 'HTTP_CF_CONNECTING_IP', 'true-client-ip' => 'HTTP_TRUE_CLIENT_IP', 'x-real-ip' => 'HTTP_X_REAL_IP', 'x-forwarded-for' => 'HTTP_X_FORWARDED_FOR' ) as $hk => $sv ) {
+							if ( ! empty( $_SERVER[ $sv ] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- presence check only, value unused.
+								$seen_hdrs[] = $hk;
+							}
+						}
+						if ( '' === $o['trust_proxy_header'] && $seen_hdrs ) :
+							?>
+							<p class="description" style="color:#b32d2e"><?php echo esc_html( sprintf( /* translators: header name */ __( 'This request arrived with a %s header, so your site is behind a proxy or CDN. With "None" selected every visitor looks like it comes from the proxy: real Googlebot fails verification and gets charged, and source counts collapse to one.', 'forgemesh-pay-per-crawl' ), strtoupper( $seen_hdrs[0] ) ) ); ?></p>
+						<?php elseif ( '' !== $o['trust_proxy_header'] && ! in_array( $o['trust_proxy_header'], $seen_hdrs, true ) ) : ?>
+							<p class="description" style="color:#b32d2e"><?php esc_html_e( 'The selected header was not present on this request. If your proxy does not set it, a crawler can send the header itself and claim any address.', 'forgemesh-pay-per-crawl' ); ?></p>
+						<?php endif; ?>
+						<p class="description"><?php esc_html_e( 'Why it matters: the plugin verifies search engines by reverse DNS on the client address and counts distinct bot sources by it. Behind Cloudflare or another proxy the connection address is the proxy, not the crawler, so the real address has to be read from a header the proxy adds. Only choose a header your proxy sets itself; otherwise anyone can forge it.', 'forgemesh-pay-per-crawl' ); ?></p>
+						<ul class="description" style="margin:0.3em 0 0 1.2em;list-style:disc">
+							<li><strong>None</strong> — <?php esc_html_e( 'WordPress is reached directly (no CDN, no reverse proxy). Default.', 'forgemesh-pay-per-crawl' ); ?></li>
+							<li><strong>CF-Connecting-IP</strong> — <?php esc_html_e( 'set by Cloudflare on every proxied request. Pick this if your DNS is on Cloudflare with the orange cloud on, or you use a Cloudflare Tunnel.', 'forgemesh-pay-per-crawl' ); ?></li>
+							<li><strong>True-Client-IP</strong> — <?php esc_html_e( 'set by Akamai and by Cloudflare Enterprise. Same meaning as CF-Connecting-IP.', 'forgemesh-pay-per-crawl' ); ?></li>
+							<li><strong>X-Real-IP</strong> — <?php esc_html_e( 'set by nginx or a load balancer you run yourself (proxy_set_header X-Real-IP $remote_addr). Not set by Cloudflare.', 'forgemesh-pay-per-crawl' ); ?></li>
+							<li><strong>X-Forwarded-For</strong> — <?php esc_html_e( 'the generic chain header most hosts and load balancers append to. The plugin uses the right-most address, the one your own proxy added, because a crawler can put anything in the left-most slot.', 'forgemesh-pay-per-crawl' ); ?></li>
+						</ul></td></tr>
 				</table>
 
 				<h2><?php esc_html_e( '4. Facilitator (advanced)', 'forgemesh-pay-per-crawl' ); ?></h2>
@@ -366,7 +387,8 @@ final class FMPPC_Admin {
 						<label><input type="radio" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator]" value="payai" <?php checked( 'payai', $o['facilitator'] ); ?>> PayAI (<code>facilitator.payai.network</code>)</label><br>
 						<label><input type="radio" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator]" value="custom" <?php checked( 'custom', $o['facilitator'] ); ?>> <?php esc_html_e( 'Custom URL', 'forgemesh-pay-per-crawl' ); ?></label>
 						<input type="url" class="regular-text code" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator_url]" value="<?php echo esc_attr( $o['facilitator_url'] ); ?>" placeholder="https://">
-						<br><label><?php esc_html_e( 'Authorization header (optional)', 'forgemesh-pay-per-crawl' ); ?> <input type="text" class="regular-text code" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator_auth]" value="<?php echo esc_attr( $o['facilitator_auth'] ); ?>" placeholder="Bearer …"></label></td></tr>
+						<br><label><?php esc_html_e( 'Authorization header (optional)', 'forgemesh-pay-per-crawl' ); ?> <input type="text" class="regular-text code" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[facilitator_auth]" value="<?php echo esc_attr( $o['facilitator_auth'] ); ?>" placeholder="Bearer …"></label>
+						<p class="description"><?php esc_html_e( 'Sent as the Authorization header on every verify and settle call to a custom facilitator. Leave it empty for PayAI, which needs no credentials. Use it when the facilitator you run or rent requires a key, for example Coinbase CDP (a Bearer token built from your CDP API key). It is never sent anywhere except the facilitator URL above.', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>
 				</table>
 				<h2><?php esc_html_e( '5. Pro (optional)', 'forgemesh-pay-per-crawl' ); ?></h2>
 				<p><?php esc_html_e( 'Pro adds a hosted dashboard for all your sites, a Monday email digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the ForgeMesh paid-sites directory. $4.99/month for up to 5 sites.', 'forgemesh-pay-per-crawl' ); ?>
@@ -378,7 +400,7 @@ final class FMPPC_Admin {
 						<?php if ( '' !== $o['pro_key'] ) : ?>
 							<p class="description"><?php echo ! empty( $pst['ok'] ) ? '<span style="color:#0b6b2e">&#10003; ' . esc_html( sprintf( /* translators: 1 status, 2 used, 3 limit */ __( 'verified (%1$s), %2$d of %3$d sites', 'forgemesh-pay-per-crawl' ), $pst['status'], $pst['sites_used'], $pst['site_limit'] ) ) . '</span>' : '<span style="color:#b32d2e">' . esc_html( sprintf( /* translators: status */ __( 'not verified: %s', 'forgemesh-pay-per-crawl' ), (string) ( $pst['status'] ?? 'pending' ) ) ) . '</span>'; ?>
 							<?php if ( ! empty( $pst['synced_at'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: time ago */ __( 'last sync %s ago', 'forgemesh-pay-per-crawl' ), human_time_diff( (int) $pst['synced_at'] ) ) ); ?><?php echo ! empty( $pst['sync_error'] ) ? ' (' . esc_html( $pst['sync_error'] ) . ')' : ''; ?><?php endif; ?>
-							<?php if ( ! empty( $pst['intel_count'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: 1 count, 2 version */ __( 'crawler feed: %1$d agents (%2$s)', 'forgemesh-pay-per-crawl' ), $pst['intel_count'], $pst['intel_version'] ) ); ?><?php endif; ?>
+							<?php if ( ! empty( $pst['intel_count'] ) ) : ?> · <?php echo esc_html( sprintf( /* translators: 1 count, 2 version, 3 time ago */ __( 'crawler feed: %1$d agents (%2$s), refreshed %3$s ago', 'forgemesh-pay-per-crawl' ), $pst['intel_count'], $pst['intel_version'], human_time_diff( (int) $pst['intel_at'] ) ) ); ?><?php endif; ?>
 							· <a href="<?php echo esc_url( ! empty( $pst['dashboard'] ) ? $pst['dashboard'] : FMPPC_Pro::BASE . '/wp/dashboard' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'hosted dashboard', 'forgemesh-pay-per-crawl' ); ?></a></p>
 						<?php endif; ?></td></tr>
 					<tr><th><?php esc_html_e( 'Directory', 'forgemesh-pay-per-crawl' ); ?></th><td>
@@ -390,7 +412,7 @@ final class FMPPC_Admin {
 			<h2><?php esc_html_e( 'Get listed', 'forgemesh-pay-per-crawl' ); ?></h2>
 			<p><?php esc_html_e( 'x402 indexes pick this site up from its manifest once a first payment settles. To be listed sooner, submit the site to the ForgeMesh x402 Verified index (free by pull request, or a $0.05 paid submit).', 'forgemesh-pay-per-crawl' ); ?>
 			<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( 'https://forgemesh.io/verified/claim?src=wordpress&host=' . rawurlencode( wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) ); ?>"><?php esc_html_e( 'List on ForgeMesh', 'forgemesh-pay-per-crawl' ); ?></a></p>
-			<p class="description"><?php esc_html_e( 'The plugin itself never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented.', 'forgemesh-pay-per-crawl' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Without a Pro key the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented. With a Pro key it also syncs bot counts and settlements to the hosted dashboard once an hour.', 'forgemesh-pay-per-crawl' ); ?></p>
 		</div>
 		<?php
 	}

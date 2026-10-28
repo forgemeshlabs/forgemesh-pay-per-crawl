@@ -3,7 +3,7 @@
  * Plugin Name:       ForgeMesh Pay-per-Crawl
  * Plugin URI:        https://forgemesh.io/wordpress
  * Description:       Charge AI crawlers and bots per page with x402 USDC micropayments on Base, paid straight to your wallet. Humans and verified search engines read free. Full bot analytics in wp-admin.
- * Version:           0.2.2
+ * Version:           0.2.3
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            ForgeMesh Labs
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FMPPC_VERSION', '0.2.2' );
+define( 'FMPPC_VERSION', '0.2.3' );
 define( 'FMPPC_FILE', __FILE__ );
 define( 'FMPPC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FMPPC_URL', plugin_dir_url( __FILE__ ) );
