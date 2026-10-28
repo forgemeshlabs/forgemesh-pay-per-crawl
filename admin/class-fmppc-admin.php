@@ -254,6 +254,13 @@ final class FMPPC_Admin {
 				<div class="fmppc-tile fmppc-tile-rev"><span><?php esc_html_e( 'Revenue (USDC)', 'forgemesh-pay-per-crawl' ); ?></span><strong><?php echo esc_html( self::usd( $t['revenue_units'] ) ); ?></strong><em><?php echo 'monitor' === $s['mode'] ? esc_html( sprintf( /* translators: amount */ __( 'would have been %s at the current price', 'forgemesh-pay-per-crawl' ), self::usd( $would ) ) ) : esc_html( sprintf( /* translators: count */ __( '%s rejected', 'forgemesh-pay-per-crawl' ), number_format_i18n( $t['rejected'] ) ) ); ?></em></div>
 			</div>
 
+			<?php $dir_n = count( FMPPC_Classifier::catalog() ); $dir_seen = count( array_filter( $bots, function ( $b ) { return 'human' !== $b['ua_class']; } ) ); ?>
+			<a class="fmppc-feature" href="<?php echo esc_url( admin_url( 'admin.php?page=fmppc-bots' ) ); ?>" target="_blank" rel="noopener">
+				<span class="fmppc-feature-icon">&#9881;</span>
+				<span class="fmppc-feature-text"><strong><?php esc_html_e( 'Bot directory', 'forgemesh-pay-per-crawl' ); ?></strong> <?php echo esc_html( sprintf( /* translators: 1 known, 2 seen */ __( '%1$s crawlers explained, %2$s of them seen on this site. Who runs each one, what it does with your pages, how to verify it, and what you currently do with it. Searchable, grouped, and it grows as new bots appear.', 'forgemesh-pay-per-crawl' ), number_format_i18n( $dir_n ), number_format_i18n( $dir_seen ) ) ); ?></span>
+				<span class="fmppc-feature-cta"><?php esc_html_e( 'Open in new tab', 'forgemesh-pay-per-crawl' ); ?> &#8599;</span>
+			</a>
+
 			<h2><?php esc_html_e( 'Bot hits per day', 'forgemesh-pay-per-crawl' ); ?> <span class="fmppc-legend"><i class="fmppc-sw fmppc-sw-bot"></i> <?php esc_html_e( 'bot hits', 'forgemesh-pay-per-crawl' ); ?> <i class="fmppc-sw fmppc-sw-paid"></i> <?php esc_html_e( 'paid', 'forgemesh-pay-per-crawl' ); ?> · <?php echo esc_html( sprintf( /* translators: peak count */ __( 'peak %s/day', 'forgemesh-pay-per-crawl' ), number_format_i18n( $max ) ) ); ?></span></h2>
 			<div class="fmppc-chart">
 				<?php foreach ( $daily as $i => $d ) : ?>
@@ -414,7 +421,7 @@ final class FMPPC_Admin {
 				?>
 				<p><?php esc_html_e( 'Price or policy by what is being fetched and by who is fetching it. Rules are checked top to bottom; the first match wins. Anything unmatched falls back to the per-bot overrides, the class policy and the site price above. Content rules are advertised as separate entries in the x402 manifest, so indexes see each price group.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<?php if ( ! $pro_on ) : ?><p class="description" style="color:#b32d2e"><?php esc_html_e( 'Rules are saved but only enforced while a verified Pro key is present (section 5). Without one the site uses the single price above.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
-				<p class="description"><a href="<?php echo esc_url( admin_url( 'admin.php?page=fmppc-bots' ) ); ?>"><?php esc_html_e( 'What are all these bots? Open the bot directory.', 'forgemesh-pay-per-crawl' ); ?></a> <?php esc_html_e( 'Pick a type and the next box lists what exists on this site (your post types, categories and tags) or every crawler the plugin knows: the built-in list, the Pro crawler feed, and any bot already seen in your ledger. New crawlers show up here as they appear. Paths are typed by hand.', 'forgemesh-pay-per-crawl' ); ?></p>
+				<p class="description"><a href="<?php echo esc_url( admin_url( 'admin.php?page=fmppc-bots' ) ); ?>" target="_blank" rel="noopener" class="fmppc-popout"><?php esc_html_e( 'What are all these bots? Open the bot directory in a new tab', 'forgemesh-pay-per-crawl' ); ?> &#8599;</a> <?php esc_html_e( 'Pick a type and the next box lists what exists on this site (your post types, categories and tags) or every crawler the plugin knows: the built-in list, the Pro crawler feed, and any bot already seen in your ledger. New crawlers show up here as they appear. Paths are typed by hand.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<table class="widefat striped fmppc-rules"><thead><tr><th>#</th><th><?php esc_html_e( 'When', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'is', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'then', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'price (USD)', 'forgemesh-pay-per-crawl' ); ?></th></tr></thead><tbody>
 				<?php for ( $i = 0; $i < $slots; $i++ ) :
 					$r = $rules[ $i ] ?? array( 'type' => '', 'value' => '', 'action' => 'paid', 'price_usd' => '' );

@@ -20,6 +20,7 @@ Pay-per-Crawl shows you every AI crawler, SEO crawler and script that fetches yo
 * **You keep 100%.** The payer's USDC goes directly to the wallet you enter. Nothing is held by the plugin, by ForgeMesh, or by anyone else.
 * **Bot analytics in wp-admin.** Who is crawling (by name and class), how often, from how many sources, which paths, what was paid, every settlement with its transaction link. Start in *Monitor* mode and see what the bots would have paid before you charge anything.
 * **Pro (optional, $4.99/month).** A hosted dashboard for up to 5 sites, a Monday digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the paid-sites directory. Everything above works without it.
+* **Bot directory.** Every crawler the plugin knows, explained for humans: who runs it, what it does with your pages, how it is verified, its robots.txt line, and what your site currently does with it. Searchable, grouped by purpose, and it grows as new bots appear on your site.
 * **Discovery built in.** The plugin serves `/.well-known/x402.json`, `/llms.txt` and `/agents.txt` and adds lines to `robots.txt`, so paying agents and x402 indexes find your paid pages.
 
 = How a payment works =
@@ -95,6 +96,7 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 * Wording: "Without a Pro key the plugin never contacts ForgeMesh."
 * Pro: pricing rules. Charge, free or block by post type, category, tag, path, bot name, bot purpose or bot class, each with its own price; first match wins; content price groups are advertised as separate manifest entries.
 * AI Crawler Audit page (free summary; $19 one-time unlock verified offline).
+* Bot directory: searchable, grouped reference of every known crawler with this site's own sightings and policy; grows from the shipped list, the Pro feed and the ledger.
 * Honest positioning: the plugin is a bot ledger with an x402 price tag; the big AI labs' crawlers do not pay per page yet.
 
 = 0.2.2 =

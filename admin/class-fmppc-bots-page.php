@@ -94,7 +94,8 @@ final class FMPPC_Bots_Page {
 			}
 			update_option( self::FIRST_SEEN, $first, false );
 		}
-		uasort( $list, function ( $a, $b ) { return strnatcasecmp( $a['name'], $b['name'] ); } );
+		// Seen-on-this-site first (busiest first), then the rest alphabetically.
+		uasort( $list, function ( $a, $b ) { return ( $b['hits'] <=> $a['hits'] ) ?: strnatcasecmp( $a['name'], $b['name'] ); } );
 		return $list;
 	}
 
@@ -167,7 +168,8 @@ final class FMPPC_Bots_Page {
 
 			<?php foreach ( $groups as $key => $g ) : if ( empty( $by[ $key ] ) ) { continue; } ?>
 				<details class="fmppc-bot-group" data-group="<?php echo esc_attr( $key ); ?>" <?php echo in_array( $key, array( 'training', 'unknown' ), true ) || count( $by[ $key ] ) <= 4 ? 'open' : ''; ?>>
-					<summary><span class="fmppc-bot-group-title"><?php echo esc_html( $g[0] ); ?></span> <span class="fmppc-bot-group-n"><?php echo esc_html( number_format_i18n( count( $by[ $key ] ) ) ); ?></span><span class="fmppc-bot-group-desc"><?php echo esc_html( $g[1] ); ?></span></summary>
+					<?php $gseen = count( array_filter( $by[ $key ], function ( $b ) { return $b['hits'] > 0; } ) ); ?>
+					<summary><span class="fmppc-bot-group-title"><?php echo esc_html( $g[0] ); ?></span> <span class="fmppc-bot-group-n"><?php echo esc_html( number_format_i18n( count( $by[ $key ] ) ) ); ?></span><?php if ( $gseen ) : ?><span class="fmppc-bot-group-seen"><?php echo esc_html( sprintf( /* translators: count */ _n( '%s seen here', '%s seen here', $gseen, 'forgemesh-pay-per-crawl' ), number_format_i18n( $gseen ) ) ); ?></span><?php endif; ?><span class="fmppc-bot-group-desc"><?php echo esc_html( $g[1] ); ?></span></summary>
 					<div class="fmppc-bot-cards">
 					<?php foreach ( $by[ $key ] as $b ) : $p = $b['policy']; ?>
 						<article class="fmppc-bot" id="bot-<?php echo esc_attr( sanitize_title( $b['name'] ) ); ?>"
@@ -175,6 +177,7 @@ final class FMPPC_Bots_Page {
 							data-seen="<?php echo $b['hits'] ? '1' : '0'; ?>" data-new="<?php echo ! empty( $b['is_new'] ) ? '1' : '0'; ?>" data-policy="<?php echo esc_attr( $p['action'] ); ?>">
 							<header>
 								<h3><?php echo esc_html( $b['name'] ); ?></h3>
+								<?php if ( $b['hits'] ) : ?><span class="fmppc-tag fmppc-tag-seen" title="<?php esc_attr_e( 'fetches on this site in the last year', 'forgemesh-pay-per-crawl' ); ?>"><?php echo esc_html( number_format_i18n( $b['hits'] ) ); ?></span><?php endif; ?>
 								<?php if ( ! empty( $b['is_new'] ) ) : ?><span class="fmppc-tag fmppc-tag-new"><?php esc_html_e( 'new', 'forgemesh-pay-per-crawl' ); ?></span><?php endif; ?>
 								<span class="fmppc-tag fmppc-tag-<?php echo esc_attr( $p['action'] ); ?>" title="<?php echo esc_attr( sprintf( /* translators: source */ __( 'set by %s', 'forgemesh-pay-per-crawl' ), $p['via'] ) ); ?>"><?php echo esc_html( $pol( $p ) ); ?></span>
 							</header>
