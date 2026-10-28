@@ -161,10 +161,23 @@ final class FMPPC_Admin {
 		$would  = 0;
 		global $wpdb;
 		$would = (int) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount_units) FROM {$wpdb->prefix}fmppc_hits WHERE status='monitor' AND ts >= %s", gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB
-		$max   = 1;
+		// Pad the range so every day in view gets a bar (a lone day is otherwise one full-width block).
+		$by_day = array();
+		foreach ( $daily as $d ) {
+			$by_day[ $d['day'] ] = $d;
+		}
+		$daily = array();
+		for ( $i = $days - 1; $i >= 0; $i-- ) {
+			$day     = gmdate( 'Y-m-d', time() - $i * DAY_IN_SECONDS );
+			$daily[] = isset( $by_day[ $day ] ) ? $by_day[ $day ] : array( 'day' => $day, 'bot_hits' => 0, 'human_hits' => 0, 'paid' => 0, 'revenue_units' => 0 );
+		}
+		$max     = 1;
+		$any     = false;
 		foreach ( $daily as $d ) {
 			$max = max( $max, (int) $d['bot_hits'] );
+			$any = $any || (int) $d['bot_hits'] > 0 || (int) $d['human_hits'] > 0;
 		}
+		$label_every = $days > 31 ? (int) ceil( $days / 15 ) : 1;
 		$export = wp_nonce_url( admin_url( 'admin-post.php?action=fmppc_export&days=' . $days ), 'fmppc_export' );
 		?>
 		<div class="wrap fmppc">
@@ -190,16 +203,17 @@ final class FMPPC_Admin {
 				<div class="fmppc-tile fmppc-tile-rev"><span><?php esc_html_e( 'Revenue (USDC)', 'forgemesh-pay-per-crawl' ); ?></span><strong><?php echo esc_html( self::usd( $t['revenue_units'] ) ); ?></strong><em><?php echo 'monitor' === $s['mode'] ? esc_html( sprintf( /* translators: amount */ __( 'would have been %s at the current price', 'forgemesh-pay-per-crawl' ), self::usd( $would ) ) ) : esc_html( sprintf( /* translators: count */ __( '%s rejected', 'forgemesh-pay-per-crawl' ), number_format_i18n( $t['rejected'] ) ) ); ?></em></div>
 			</div>
 
-			<h2><?php esc_html_e( 'Bot hits per day', 'forgemesh-pay-per-crawl' ); ?></h2>
+			<h2><?php esc_html_e( 'Bot hits per day', 'forgemesh-pay-per-crawl' ); ?> <span class="fmppc-legend"><i class="fmppc-sw fmppc-sw-bot"></i> <?php esc_html_e( 'bot hits', 'forgemesh-pay-per-crawl' ); ?> <i class="fmppc-sw fmppc-sw-paid"></i> <?php esc_html_e( 'paid', 'forgemesh-pay-per-crawl' ); ?> · <?php echo esc_html( sprintf( /* translators: peak count */ __( 'peak %s/day', 'forgemesh-pay-per-crawl' ), number_format_i18n( $max ) ) ); ?></span></h2>
 			<div class="fmppc-chart">
-				<?php foreach ( $daily as $d ) : ?>
-					<div class="fmppc-bar" title="<?php echo esc_attr( $d['day'] . ': ' . $d['bot_hits'] . ' bot, ' . $d['human_hits'] . ' human, ' . $d['paid'] . ' paid' ); ?>">
+				<?php foreach ( $daily as $i => $d ) : ?>
+					<div class="fmppc-bar<?php echo (int) $d['bot_hits'] ? '' : ' fmppc-bar-empty'; ?>" title="<?php echo esc_attr( $d['day'] . ': ' . $d['bot_hits'] . ' bot, ' . $d['human_hits'] . ' human, ' . $d['paid'] . ' paid' ); ?>">
+						<?php if ( (int) $d['bot_hits'] ) : ?><span class="fmppc-bar-n"><?php echo esc_html( number_format_i18n( (int) $d['bot_hits'] ) ); ?><?php if ( (int) $d['paid'] ) : ?><em><?php echo esc_html( number_format_i18n( (int) $d['paid'] ) ); ?></em><?php endif; ?></span><?php endif; ?>
 						<div class="fmppc-bar-fill" style="height:<?php echo esc_attr( (int) round( 100 * (int) $d['bot_hits'] / $max ) ); ?>%"></div>
 						<div class="fmppc-bar-paid" style="height:<?php echo esc_attr( (int) round( 100 * (int) $d['paid'] / $max ) ); ?>%"></div>
-						<label><?php echo esc_html( substr( $d['day'], 5 ) ); ?></label>
+						<?php if ( 0 === $i % $label_every || $i === $days - 1 ) : ?><label><?php echo esc_html( 1 === $days ? __( 'today', 'forgemesh-pay-per-crawl' ) : substr( $d['day'], 5 ) ); ?></label><?php endif; ?>
 					</div>
 				<?php endforeach; ?>
-				<?php if ( ! $daily ) : ?><p><?php esc_html_e( 'No traffic logged yet.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
+				<?php if ( ! $any ) : ?><p class="fmppc-chart-empty"><?php esc_html_e( 'No traffic logged yet.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
 			</div>
 
 			<div class="fmppc-cols">

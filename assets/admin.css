@@ -8,7 +8,14 @@
 .fmppc .fmppc-tile strong{display:block;font-size:28px;line-height:1.2;margin:4px 0}
 .fmppc .fmppc-tile em{font-style:normal;color:#646970;font-size:12px}
 .fmppc .fmppc-tile-rev strong{color:#0b6b2e}
-.fmppc .fmppc-chart{display:flex;align-items:flex-end;gap:4px;height:160px;background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 12px 28px;margin-bottom:24px;overflow-x:auto}
+.fmppc .fmppc-chart{display:flex;align-items:flex-end;gap:4px;height:180px;background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:26px 12px 28px;margin-bottom:24px;overflow-x:auto;position:relative}
+.fmppc .fmppc-chart-empty{position:absolute;left:0;right:0;top:45%;text-align:center;color:#646970;margin:0}
+.fmppc .fmppc-bar-empty .fmppc-bar-fill{background:#f0f0f1}
+.fmppc .fmppc-bar-n{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;line-height:1;color:#1d2327;white-space:nowrap}
+.fmppc .fmppc-bar-n em{display:block;font-style:normal;color:#1e8c3a;font-size:10px}
+.fmppc .fmppc-legend{font-size:12px;font-weight:400;color:#646970;margin-left:8px}
+.fmppc .fmppc-sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;margin:0 2px 0 6px}
+.fmppc .fmppc-sw-bot{background:#8c8f94}.fmppc .fmppc-sw-paid{background:#1e8c3a}
 .fmppc .fmppc-bar{position:relative;flex:1 0 14px;min-width:14px;height:100%;display:flex;align-items:flex-end}
 .fmppc .fmppc-bar-fill{width:100%;background:#8c8f94;border-radius:2px 2px 0 0;min-height:1px}
 .fmppc .fmppc-bar-paid{position:absolute;left:0;bottom:0;width:100%;background:#1e8c3a;border-radius:2px 2px 0 0}
