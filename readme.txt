@@ -93,6 +93,8 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 * Settings: plain-language descriptions for the Client IP header (what each header is, who sets it, why verification depends on it) and the facilitator Authorization header; warns when the site is behind a proxy but no header is selected, or the selected header is absent.
 * Analytics: shows how many agents the built-in bot list knows and when it was last revised; Pro shows when the crawler feed last refreshed.
 * Wording: "Without a Pro key the plugin never contacts ForgeMesh."
+* Pro: pricing rules. Charge, free or block by post type, category, tag, path, bot name, bot purpose or bot class, each with its own price; first match wins; content price groups are advertised as separate manifest entries.
+* AI Crawler Audit page (free summary; $19 one-time unlock verified offline).
 * Honest positioning: the plugin is a bot ledger with an x402 price tag; the big AI labs' crawlers do not pay per page yet.
 
 = 0.2.2 =

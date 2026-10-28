@@ -103,6 +103,7 @@ final class FMPPC_Admin {
 				$out['allow_paths'][] = sanitize_text_field( $p );
 			}
 		}
+		$out['price_rules'] = FMPPC_Rules::sanitize( $in['price_rules'] ?? array() );
 		foreach ( array( 'gate_feeds', 'gate_rest', 'log_humans', 'discovery', 'publish_contact' ) as $flag ) {
 			$out[ $flag ] = empty( $in[ $flag ] ) ? 0 : 1;
 		}
@@ -351,6 +352,45 @@ final class FMPPC_Admin {
 						</select></td></tr>
 				<?php endforeach; ?>
 				</tbody></table></details>
+
+				<h2><?php esc_html_e( '2b. Pricing rules', 'forgemesh-pay-per-crawl' ); ?> <span class="fmppc-pro-badge">Pro</span></h2>
+				<?php
+				$rules_on = FMPPC_Rules::active( $o );
+				$pro_on   = FMPPC_Pro::enabled( $o ) && ! empty( FMPPC_Pro::state()['ok'] );
+				$rules    = array_values( (array) $o['price_rules'] );
+				$slots    = max( 6, count( $rules ) + 3 );
+				$pts      = array_values( array_filter( get_post_types( array( 'public' => true ), 'objects' ), function ( $p ) { return 'attachment' !== $p->name; } ) );
+				$cats     = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'number' => 25, 'orderby' => 'count', 'order' => 'DESC' ) );
+				$purposes = array( 'training', 'ai-search', 'user-fetch', 'agent-retrieval', 'seo', 'archive', 'scraping' );
+				?>
+				<p><?php esc_html_e( 'Price or policy by what is being fetched and by who is fetching it. Rules are checked top to bottom; the first match wins. Anything unmatched falls back to the per-bot overrides, the class policy and the site price above. Content rules are advertised as separate entries in the x402 manifest, so indexes see each price group.', 'forgemesh-pay-per-crawl' ); ?></p>
+				<?php if ( ! $pro_on ) : ?><p class="description" style="color:#b32d2e"><?php esc_html_e( 'Rules are saved but only enforced while a verified Pro key is present (section 5). Without one the site uses the single price above.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
+				<p class="description"><?php echo esc_html( sprintf( /* translators: 1 post types, 2 categories */ __( 'Values on this site: post types %1$s · categories %2$s · purposes training, ai-search, user-fetch, agent-retrieval, seo, archive, scraping · classes ai, seo, automation, bot, social, monitor · paths like /guides/ (prefix) or /about (exact).', 'forgemesh-pay-per-crawl' ), implode( ', ', array_map( function ( $p ) { return $p->name; }, $pts ) ), implode( ', ', array_map( function ( $t ) { return $t->slug; }, is_array( $cats ) ? $cats : array() ) ) ?: '—' ) ); ?></p>
+				<table class="widefat striped fmppc-rules"><thead><tr><th>#</th><th><?php esc_html_e( 'When', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'is', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'then', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'price (USD)', 'forgemesh-pay-per-crawl' ); ?></th></tr></thead><tbody>
+				<?php for ( $i = 0; $i < $slots; $i++ ) :
+					$r = $rules[ $i ] ?? array( 'type' => '', 'value' => '', 'action' => 'paid', 'price_usd' => '' );
+					$n = esc_attr( FMPPC::OPTION ) . '[price_rules][' . $i . ']';
+					?>
+					<tr><td><?php echo (int) ( $i + 1 ); ?></td>
+					<td><select name="<?php echo $n; // phpcs:ignore ?>[type]"><option value=""><?php esc_html_e( '— unused —', 'forgemesh-pay-per-crawl' ); ?></option>
+						<?php foreach ( array( 'post_type' => __( 'post type', 'forgemesh-pay-per-crawl' ), 'category' => __( 'category', 'forgemesh-pay-per-crawl' ), 'tag' => __( 'tag', 'forgemesh-pay-per-crawl' ), 'path' => __( 'path', 'forgemesh-pay-per-crawl' ), 'bot' => __( 'bot name', 'forgemesh-pay-per-crawl' ), 'purpose' => __( 'bot purpose', 'forgemesh-pay-per-crawl' ), 'class' => __( 'bot class', 'forgemesh-pay-per-crawl' ) ) as $k => $lbl ) : ?>
+							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $k, $r['type'] ); ?>><?php echo esc_html( $lbl ); ?></option>
+						<?php endforeach; ?></select></td>
+					<td><input type="text" class="code" name="<?php echo $n; // phpcs:ignore ?>[value]" value="<?php echo esc_attr( $r['value'] ); ?>" placeholder="recipes · ClaudeBot · training · /guides/" list="fmppc-rule-values"></td>
+					<td><select name="<?php echo $n; // phpcs:ignore ?>[action]">
+						<option value="paid" <?php selected( 'paid', $r['action'] ); ?>><?php esc_html_e( 'charge', 'forgemesh-pay-per-crawl' ); ?></option>
+						<option value="free" <?php selected( 'free', $r['action'] ); ?>><?php esc_html_e( 'free', 'forgemesh-pay-per-crawl' ); ?></option>
+						<option value="block" <?php selected( 'block', $r['action'] ); ?>><?php esc_html_e( 'block', 'forgemesh-pay-per-crawl' ); ?></option></select></td>
+					<td><input type="number" step="0.001" min="0.005" max="100" name="<?php echo $n; // phpcs:ignore ?>[price_usd]" value="<?php echo esc_attr( null === $r['price_usd'] ? '' : $r['price_usd'] ); ?>" placeholder="<?php echo esc_attr( $o['price_usd'] ); ?>" style="width:7em"></td></tr>
+				<?php endfor; ?>
+				</tbody></table>
+				<datalist id="fmppc-rule-values">
+					<?php foreach ( $pts as $p ) : ?><option value="<?php echo esc_attr( $p->name ); ?>"><?php endforeach; ?>
+					<?php foreach ( ( is_array( $cats ) ? $cats : array() ) as $t ) : ?><option value="<?php echo esc_attr( $t->slug ); ?>"><?php endforeach; ?>
+					<?php foreach ( $purposes as $p ) : ?><option value="<?php echo esc_attr( $p ); ?>"><?php endforeach; ?>
+					<?php foreach ( array( 'GPTBot', 'ClaudeBot', 'PerplexityBot', 'Bytespider', 'CCBot', 'AhrefsBot', 'SemrushBot', 'python-requests' ) as $b ) : ?><option value="<?php echo esc_attr( $b ); ?>"><?php endforeach; ?>
+				</datalist>
+				<p class="description"><?php esc_html_e( 'Examples: category recipes → charge 0.05 · post type page → free · bot purpose training → charge 0.10 · bot name Bytespider → block · path /archive/ → charge 0.005. Leave price empty to use the site price. Save with the type set to "unused" to delete a row.', 'forgemesh-pay-per-crawl' ); ?><?php if ( $rules_on ) : ?> <strong><?php echo esc_html( sprintf( /* translators: count */ _n( '%d rule active.', '%d rules active.', count( $rules ), 'forgemesh-pay-per-crawl' ), count( $rules ) ) ); ?></strong><?php endif; ?></p>
 
 				<h2><?php esc_html_e( '3. Scope', 'forgemesh-pay-per-crawl' ); ?></h2>
 				<table class="form-table" role="presentation">

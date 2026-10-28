@@ -51,3 +51,6 @@
 .fmppc-audit .fmppc-audit-notice textarea{width:100%;max-width:800px;font-family:monospace;font-size:12px}
 .fmppc-audit .fmppc-audit-classes{max-width:600px;margin:12px 0}
 @media print{#adminmenumain,#wpadminbar,#wpfooter,.fmppc-noprint,.notice,.fmppc-audit-tokenform,.update-nag{display:none!important}#wpcontent{margin-left:0}.fmppc-audit .fmppc-audit-op,.fmppc-audit .fmppc-audit-lock{break-inside:avoid;border-color:#999}.fmppc-audit details{display:block}.fmppc-audit details>*{display:block}}
+
+.fmppc .fmppc-pro-badge{display:inline-block;font-size:11px;font-weight:600;color:#fff;background:#2271b1;border-radius:3px;padding:1px 6px;vertical-align:middle;margin-left:6px}
+.fmppc .fmppc-rules{max-width:980px}.fmppc .fmppc-rules td{vertical-align:middle}.fmppc .fmppc-rules input.code{width:100%}

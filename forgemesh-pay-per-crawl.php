@@ -30,6 +30,7 @@ require_once FMPPC_DIR . 'includes/class-fmppc-gate.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-discovery.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-pro.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-audit.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-rules.php';
 
 final class FMPPC {
 
@@ -53,6 +54,7 @@ final class FMPPC {
 				'bot'        => 'paid',
 			),
 			'bot_overrides'      => array(),
+			'price_rules'        => array(), // Pro: ordered rules, see FMPPC_Rules
 			'allow_paths'        => array(),
 			'gate_feeds'         => 0,
 			'gate_rest'          => 0,

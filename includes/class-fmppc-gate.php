@@ -119,7 +119,9 @@ final class FMPPC_Gate {
 			'ua'       => $ua,
 		);
 
-		$x402    = $this->x402( $url );
+		$rule    = FMPPC_Rules::active( $this->s ) ? FMPPC_Rules::match( (array) $this->s['price_rules'], $c, $this->path() ) : null;
+		$price   = ( $rule && 'paid' === $rule['action'] && null !== $rule['price_usd'] ) ? (float) $rule['price_usd'] : (float) $this->s['price_usd'];
+		$x402    = $this->x402( $url, $price );
 		$payment = $x402->extract_payment( $h, $url );
 
 		if ( 'human' === $c['class'] && ! $payment ) {
@@ -129,7 +131,7 @@ final class FMPPC_Gate {
 			return;
 		}
 
-		$policy = $this->policy_for( $c );
+		$policy = $rule ? $rule['action'] : $this->policy_for( $c );
 
 		// A payment on a free class is still honoured (and logged as revenue).
 		if ( 'free' === $policy && ! $payment ) {
@@ -142,7 +144,7 @@ final class FMPPC_Gate {
 		}
 		if ( ! $payment ) {
 			if ( 'monitor' === $this->s['mode'] || 'free' === $policy ) {
-				FMPPC_Log::record( $row + array( 'status' => 'monitor', 'amount_units' => (int) FMPPC_X402::usd_to_units( $this->s['price_usd'] ) ) );
+				FMPPC_Log::record( $row + array( 'status' => 'monitor', 'amount_units' => (int) FMPPC_X402::usd_to_units( $price ) ) );
 				return;
 			}
 			FMPPC_Log::record( $row + array( 'status' => 'unpaid' ) );
@@ -208,11 +210,11 @@ final class FMPPC_Gate {
 		return in_array( $p, array( 'free', 'paid', 'block' ), true ) ? $p : 'paid';
 	}
 
-	public function x402( $url ) {
+	public function x402( $url, $price_usd = null ) {
 		return new FMPPC_X402(
 			array(
 				'pay_to'           => $this->s['pay_to'],
-				'price_usd'        => $this->s['price_usd'],
+				'price_usd'        => null === $price_usd ? $this->s['price_usd'] : $price_usd,
 				'facilitator_url'  => $this->s['facilitator_url'],
 				'facilitator_auth' => $this->s['facilitator_auth'],
 				'mpp_secret'       => $this->s['mpp_secret'],

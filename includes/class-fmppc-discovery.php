@@ -80,6 +80,19 @@ final class FMPPC_Discovery {
 				),
 			),
 		);
+		$resources = array( $res );
+		if ( FMPPC_Rules::active( $this->s ) ) {
+			foreach ( FMPPC_Rules::manifest_groups( (array) $this->s['price_rules'], $home ) as $g ) {
+				$r = $res;
+				$r['resource']                = $g['pattern'];
+				$r['metadata']['name']        = sprintf( '%s: %s', get_bloginfo( 'name' ), $g['label'] );
+				$r['metadata']['description'] = sprintf( 'HTML pages (%s) on %s, served to automated clients after an x402 payment of $%s USDC on Base. Humans and verified search engines read free.', $g['label'], wp_parse_url( $home, PHP_URL_HOST ), rtrim( rtrim( number_format( $g['price_usd'], 6, '.', '' ), '0' ), '.' ) );
+				$r['metadata']['priceUsd']    = $g['price_usd'];
+				$r['accepts'][0]['amount']    = FMPPC_X402::usd_to_units( $g['price_usd'] );
+				array_unshift( $resources, $r );
+			}
+			$resources[ count( $resources ) - 1 ]['metadata']['name'] .= ' (default price)';
+		}
 		return array(
 			'x402Version' => 2,
 			'provider'    => array(
@@ -88,7 +101,7 @@ final class FMPPC_Discovery {
 				'description' => get_bloginfo( 'description' ),
 				'contact'     => get_option( 'admin_email' ) && ! empty( $this->s['publish_contact'] ) ? get_option( 'admin_email' ) : null,
 			),
-			'resources'   => array( $res ),
+			'resources'   => $resources,
 			'protocols'   => array( 'x402', 'mpp' ),
 			'generator'   => 'forgemesh-pay-per-crawl/' . FMPPC_VERSION,
 			'sitemap'     => home_url( '/sitemap.xml' ),
