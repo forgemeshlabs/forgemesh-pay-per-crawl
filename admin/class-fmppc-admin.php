@@ -37,9 +37,11 @@ final class FMPPC_Admin {
 		if ( false === strpos( $hook, 'fmppc' ) ) {
 			return;
 		}
-		wp_enqueue_style( 'fmppc-admin', FMPPC_URL . 'assets/admin.css', array(), FMPPC_VERSION );
+		// Version by file time so CDN and browser caches (Cloudflare keeps CSS 4h) refresh on every change.
+		$ver = function ( $f ) { $t = @filemtime( FMPPC_DIR . $f ); return FMPPC_VERSION . ( $t ? '.' . $t : '' ); };
+		wp_enqueue_style( 'fmppc-admin', FMPPC_URL . 'assets/admin.css', array(), $ver( 'assets/admin.css' ) );
 		if ( false !== strpos( $hook, 'fmppc-settings' ) || false !== strpos( $hook, 'fmppc-bots' ) ) {
-			wp_enqueue_script( 'fmppc-admin', FMPPC_URL . 'assets/admin.js', array(), FMPPC_VERSION, true );
+			wp_enqueue_script( 'fmppc-admin', FMPPC_URL . 'assets/admin.js', array(), $ver( 'assets/admin.js' ), true );
 			if ( false !== strpos( $hook, 'fmppc-settings' ) ) {
 				wp_localize_script( 'fmppc-admin', 'fmppcRules', self::rule_options() );
 			}
