@@ -80,6 +80,19 @@ final class FMPPC_Discovery {
 				),
 			),
 		);
+		$resources = array( $res );
+		if ( FMPPC_Rules::active( $this->s ) ) {
+			foreach ( FMPPC_Rules::manifest_groups( (array) $this->s['price_rules'], $home ) as $g ) {
+				$r = $res;
+				$r['resource']                = $g['pattern'];
+				$r['metadata']['name']        = sprintf( '%s: %s', get_bloginfo( 'name' ), $g['label'] );
+				$r['metadata']['description'] = sprintf( 'HTML pages (%s) on %s, served to automated clients after an x402 payment of $%s USDC on Base. Humans and verified search engines read free.', $g['label'], wp_parse_url( $home, PHP_URL_HOST ), rtrim( rtrim( number_format( $g['price_usd'], 6, '.', '' ), '0' ), '.' ) );
+				$r['metadata']['priceUsd']    = $g['price_usd'];
+				$r['accepts'][0]['amount']    = FMPPC_X402::usd_to_units( $g['price_usd'] );
+				array_unshift( $resources, $r );
+			}
+			$resources[ count( $resources ) - 1 ]['metadata']['name'] .= ' (default price)';
+		}
 		return array(
 			'x402Version' => 2,
 			'provider'    => array(
@@ -88,7 +101,7 @@ final class FMPPC_Discovery {
 				'description' => get_bloginfo( 'description' ),
 				'contact'     => get_option( 'admin_email' ) && ! empty( $this->s['publish_contact'] ) ? get_option( 'admin_email' ) : null,
 			),
-			'resources'   => array( $res ),
+			'resources'   => $resources,
 			'protocols'   => array( 'x402', 'mpp' ),
 			'generator'   => 'forgemesh-pay-per-crawl/' . FMPPC_VERSION,
 			'sitemap'     => home_url( '/sitemap.xml' ),
@@ -118,6 +131,11 @@ final class FMPPC_Discovery {
 		$l[] = 'Agents: ' . home_url( '/agents.txt' );
 		$l[] = 'Protocol: https://x402.org';
 		$l[] = '';
+		$l[] = '## To crawler operators';
+		$l[] = '';
+		$l[] = 'Say who you are: publish /.well-known/crawler-profile.json on your domain (spec: https://github.com/forgemeshlabs/crawler-profile).';
+		$l[] = 'Sites running this plugin verify crawlers by name and reverse DNS; a declared profile earns a verified badge on https://forgemesh.io/bots.';
+		$l[] = '';
 		$l[] = '## Recent posts';
 		$l[] = '';
 		$posts = get_posts( array( 'numberposts' => 20, 'post_status' => 'publish' ) );
@@ -142,6 +160,7 @@ final class FMPPC_Discovery {
 			'LLMs: ' . home_url( '/llms.txt' ),
 			'x402: ' . home_url( '/.well-known/x402.json' ),
 			'Sitemap: ' . home_url( '/sitemap.xml' ),
+			'Crawler-Profile: publish /.well-known/crawler-profile.json on your own domain (https://github.com/forgemeshlabs/crawler-profile) · directory https://forgemesh.io/bots',
 			'',
 			'## Payment',
 			'Protocol: x402 (HTTP 402 challenge; pay and retry with PAYMENT-SIGNATURE) and MPP (WWW-Authenticate: Payment)',
@@ -162,6 +181,7 @@ final class FMPPC_Discovery {
 		$output .= '# Manifest: ' . home_url( '/.well-known/x402.json' ) . "\n";
 		$output .= '# LLMs: ' . home_url( '/llms.txt' ) . "\n";
 		$output .= '# Agents: ' . home_url( '/agents.txt' ) . "\n";
+		$output .= "# Crawler operators: publish /.well-known/crawler-profile.json on your domain (https://github.com/forgemeshlabs/crawler-profile) · https://forgemesh.io/bots\n";
 		return $output;
 	}
 }

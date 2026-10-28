@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       ForgeMesh Pay-per-Crawl
  * Plugin URI:        https://forgemesh.io/wordpress
- * Description:       Charge AI crawlers and bots per page with x402 USDC micropayments on Base, paid straight to your wallet. Humans and verified search engines read free. Full bot analytics in wp-admin.
- * Version:           0.2.2
+ * Description:       Bot ledger plus an HTTP 402 price tag: see every AI, SEO and script crawler, keep search engines free, charge x402-capable agents in USDC on Base.
+ * Version:           0.2.3
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            ForgeMesh Labs
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FMPPC_VERSION', '0.2.2' );
+define( 'FMPPC_VERSION', '0.2.3' );
 define( 'FMPPC_FILE', __FILE__ );
 define( 'FMPPC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FMPPC_URL', plugin_dir_url( __FILE__ ) );
@@ -29,6 +29,9 @@ require_once FMPPC_DIR . 'includes/class-fmppc-log.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-gate.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-discovery.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-pro.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-audit.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-rules.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-atlas.php';
 
 final class FMPPC {
 
@@ -52,6 +55,8 @@ final class FMPPC {
 				'bot'        => 'paid',
 			),
 			'bot_overrides'      => array(),
+			'price_rules'        => array(), // Pro: ordered rules, see FMPPC_Rules
+			'atlas_share'        => 0, // opt-in: daily anonymous per-bot counts to Crawler Atlas
 			'allow_paths'        => array(),
 			'gate_feeds'         => 0,
 			'gate_rest'          => 0,
@@ -97,9 +102,13 @@ final class FMPPC {
 		( new FMPPC_Pro( $s ) )->hooks();
 		( new FMPPC_Gate( $s ) )->hooks();
 		add_action( 'fmppc_daily', array( __CLASS__, 'daily' ) );
+		add_action( 'fmppc_daily', array( 'FMPPC_Atlas', 'daily' ), 20 );
 		if ( is_admin() ) {
 			require_once FMPPC_DIR . 'admin/class-fmppc-admin.php';
+			require_once FMPPC_DIR . 'admin/class-fmppc-audit-page.php';
+			require_once FMPPC_DIR . 'admin/class-fmppc-bots-page.php';
 			( new FMPPC_Admin() )->hooks();
+			( new FMPPC_Audit_Page() )->hooks();
 		}
 	}
 

@@ -169,6 +169,7 @@ final class FMPPC_Pro {
 					$catalog[ $by[ $a['name'] ] ]['verify'] = $a['verify'];
 				}
 			} else {
+				$a['intel'] = true; // came from the Pro feed (shown as the source in the bot directory)
 				$catalog[] = $a;
 			}
 		}
