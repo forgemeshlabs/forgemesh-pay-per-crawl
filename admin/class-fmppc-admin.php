@@ -29,6 +29,7 @@ final class FMPPC_Admin {
 		add_menu_page( __( 'Pay-per-Crawl', 'forgemesh-pay-per-crawl' ), __( 'Pay-per-Crawl', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc', array( $this, 'dashboard' ), 'dashicons-money-alt', 81 );
 		add_submenu_page( 'fmppc', __( 'Bot analytics', 'forgemesh-pay-per-crawl' ), __( 'Bot analytics', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc', array( $this, 'dashboard' ) );
 		add_submenu_page( 'fmppc', __( 'Settings', 'forgemesh-pay-per-crawl' ), __( 'Settings', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc-settings', array( $this, 'settings_page' ) );
+		add_submenu_page( 'fmppc', __( 'Bot directory', 'forgemesh-pay-per-crawl' ), __( 'Bots', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc-bots', array( new FMPPC_Bots_Page(), 'page' ) );
 		add_submenu_page( 'fmppc', __( 'AI Crawler Audit', 'forgemesh-pay-per-crawl' ), __( 'Audit', 'forgemesh-pay-per-crawl' ), self::CAP, 'fmppc-audit', array( new FMPPC_Audit_Page(), 'page' ) );
 	}
 
@@ -37,9 +38,11 @@ final class FMPPC_Admin {
 			return;
 		}
 		wp_enqueue_style( 'fmppc-admin', FMPPC_URL . 'assets/admin.css', array(), FMPPC_VERSION );
-		if ( false !== strpos( $hook, 'fmppc-settings' ) ) {
+		if ( false !== strpos( $hook, 'fmppc-settings' ) || false !== strpos( $hook, 'fmppc-bots' ) ) {
 			wp_enqueue_script( 'fmppc-admin', FMPPC_URL . 'assets/admin.js', array(), FMPPC_VERSION, true );
-			wp_localize_script( 'fmppc-admin', 'fmppcRules', self::rule_options() );
+			if ( false !== strpos( $hook, 'fmppc-settings' ) ) {
+				wp_localize_script( 'fmppc-admin', 'fmppcRules', self::rule_options() );
+			}
 		}
 	}
 
@@ -411,7 +414,7 @@ final class FMPPC_Admin {
 				?>
 				<p><?php esc_html_e( 'Price or policy by what is being fetched and by who is fetching it. Rules are checked top to bottom; the first match wins. Anything unmatched falls back to the per-bot overrides, the class policy and the site price above. Content rules are advertised as separate entries in the x402 manifest, so indexes see each price group.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<?php if ( ! $pro_on ) : ?><p class="description" style="color:#b32d2e"><?php esc_html_e( 'Rules are saved but only enforced while a verified Pro key is present (section 5). Without one the site uses the single price above.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
-				<p class="description"><?php esc_html_e( 'Pick a type and the next box lists what exists on this site (your post types, categories and tags) or every crawler the plugin knows: the built-in list, the Pro crawler feed, and any bot already seen in your ledger. New crawlers show up here as they appear. Paths are typed by hand.', 'forgemesh-pay-per-crawl' ); ?></p>
+				<p class="description"><a href="<?php echo esc_url( admin_url( 'admin.php?page=fmppc-bots' ) ); ?>"><?php esc_html_e( 'What are all these bots? Open the bot directory.', 'forgemesh-pay-per-crawl' ); ?></a> <?php esc_html_e( 'Pick a type and the next box lists what exists on this site (your post types, categories and tags) or every crawler the plugin knows: the built-in list, the Pro crawler feed, and any bot already seen in your ledger. New crawlers show up here as they appear. Paths are typed by hand.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<table class="widefat striped fmppc-rules"><thead><tr><th>#</th><th><?php esc_html_e( 'When', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'is', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'then', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'price (USD)', 'forgemesh-pay-per-crawl' ); ?></th></tr></thead><tbody>
 				<?php for ( $i = 0; $i < $slots; $i++ ) :
 					$r = $rules[ $i ] ?? array( 'type' => '', 'value' => '', 'action' => 'paid', 'price_usd' => '' );

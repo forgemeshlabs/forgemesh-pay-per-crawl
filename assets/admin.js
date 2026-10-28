@@ -51,3 +51,39 @@
     document.querySelectorAll('.fmppc-rules tbody tr').forEach(wire);
   });
 })();
+
+/* Bot directory: live search + filter chips; groups open to show matches. */
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    var q = document.getElementById('fmppc-bot-search');
+    if (!q) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.fmppc-bot'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('.fmppc-bot-group'));
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.fmppc-chip'));
+    var count = document.getElementById('fmppc-bot-count');
+    var empty = document.getElementById('fmppc-bot-empty');
+    var filter = '';
+    var defaults = groups.map(function (g) { return g.open; });
+    function apply() {
+      var t = q.value.trim().toLowerCase();
+      var shown = 0;
+      cards.forEach(function (c) {
+        var ok = (!t || c.getAttribute('data-q').indexOf(t) !== -1) &&
+          (filter === '' || (filter === 'seen' && c.getAttribute('data-seen') === '1') || (filter === 'new' && c.getAttribute('data-new') === '1') || (['paid', 'free', 'block'].indexOf(filter) !== -1 && c.getAttribute('data-policy') === filter));
+        c.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+      });
+      groups.forEach(function (g, i) {
+        var visible = g.querySelectorAll('.fmppc-bot:not([style*="display: none"])').length;
+        g.style.display = visible ? '' : 'none';
+        g.open = (t || filter) ? true : defaults[i];
+      });
+      count.textContent = shown + ' / ' + cards.length;
+      empty.style.display = shown ? 'none' : '';
+    }
+    q.addEventListener('input', apply);
+    chips.forEach(function (ch) { ch.addEventListener('click', function () { chips.forEach(function (x) { x.classList.remove('is-on'); }); ch.classList.add('is-on'); filter = ch.getAttribute('data-filter'); apply(); }); });
+    if (location.hash && location.hash.indexOf('#bot-') === 0) { var el = document.querySelector(location.hash); if (el) { el.closest('details').open = true; el.scrollIntoView(); el.classList.add('is-target'); } }
+    apply();
+  });
+})();

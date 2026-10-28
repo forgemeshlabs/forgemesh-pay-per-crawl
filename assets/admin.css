@@ -56,3 +56,23 @@
 .fmppc .fmppc-rules{max-width:980px}.fmppc .fmppc-rules td{vertical-align:middle}.fmppc .fmppc-rules input.code{width:100%}
 .fmppc .fmppc-pro-list{list-style:disc;margin:0 0 12px 1.4em}.fmppc .fmppc-pro-list li{margin:4px 0}
 .fmppc .fmppc-rules .fmppc-rule-select{max-width:100%}
+
+/* Bot directory */
+.fmppc-bots .fmppc-grow{display:inline-block;font-size:12px;font-weight:600;color:#1e8c3a;background:#e6f4ea;border-radius:999px;padding:2px 10px;vertical-align:middle;margin-left:8px}
+.fmppc-bots .fmppc-bots-stats{display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 16px;color:#50575e;font-size:13px}.fmppc-bots .fmppc-bots-stats strong{color:#1d2327;font-size:16px}
+.fmppc-bots .fmppc-bots-tools{position:sticky;top:32px;z-index:5;background:#f0f0f1;padding:10px 0;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-bottom:1px solid #dcdcde;margin-bottom:14px}
+.fmppc-bots #fmppc-bot-search{flex:1 1 360px;max-width:520px;padding:8px 12px;font-size:14px;border-radius:6px}
+.fmppc-bots .fmppc-chips{display:flex;gap:6px;flex-wrap:wrap}
+.fmppc-bots .fmppc-chip{border:1px solid #c3c4c7;background:#fff;border-radius:999px;padding:4px 12px;font-size:12px;cursor:pointer;color:#1d2327}.fmppc-bots .fmppc-chip.is-on{background:#2271b1;border-color:#2271b1;color:#fff}
+.fmppc-bots .fmppc-bots-count{color:#646970;font-size:12px;margin-left:auto}
+.fmppc-bots .fmppc-bot-group{background:#fff;border:1px solid #dcdcde;border-radius:8px;margin:0 0 12px;padding:0}
+.fmppc-bots .fmppc-bot-group>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.fmppc-bots .fmppc-bot-group>summary::-webkit-details-marker{display:none}
+.fmppc-bots .fmppc-bot-group>summary:before{content:"▸";color:#8c8f94;font-size:12px}.fmppc-bots .fmppc-bot-group[open]>summary:before{content:"▾"}
+.fmppc-bots .fmppc-bot-group-title{font-size:15px;font-weight:600;color:#1d2327}.fmppc-bots .fmppc-bot-group-n{font-size:12px;color:#fff;background:#8c8f94;border-radius:999px;padding:1px 8px}.fmppc-bots .fmppc-bot-group-desc{flex-basis:100%;color:#646970;font-size:13px;margin-left:20px}
+.fmppc-bots .fmppc-bot-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:0 16px 16px}
+.fmppc-bots .fmppc-bot{border:1px solid #e0e0e0;border-radius:8px;padding:12px 14px;background:#fafafa}.fmppc-bots .fmppc-bot.is-target{box-shadow:0 0 0 2px #2271b1}
+.fmppc-bots .fmppc-bot header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fmppc-bots .fmppc-bot h3{margin:0;font-size:14px;flex:1}
+.fmppc-bots .fmppc-tag{font-size:11px;border-radius:999px;padding:1px 8px;font-weight:600}.fmppc-tag-paid{background:#e8f0fe;color:#1a4fa3}.fmppc-tag-free{background:#e6f4ea;color:#0b6b2e}.fmppc-tag-block{background:#fde8e8;color:#9b1c1c}.fmppc-tag-new{background:#fff4d6;color:#8a5a00}
+.fmppc-bots .fmppc-bot-op{margin:4px 0;color:#646970;font-size:12px}.fmppc-bots .fmppc-bot-note{margin:6px 0;font-size:13px;color:#1d2327}
+.fmppc-bots .fmppc-bot dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}.fmppc-bots .fmppc-bot dt{color:#8c8f94}.fmppc-bots .fmppc-bot dd{margin:0;color:#1d2327;overflow-wrap:anywhere}.fmppc-bots .fmppc-bot code{font-size:11px}
+.fmppc-bots .fmppc-bots-empty{padding:20px;background:#fff;border:1px dashed #c3c4c7;border-radius:8px;color:#646970}

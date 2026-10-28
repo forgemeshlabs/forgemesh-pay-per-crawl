@@ -103,6 +103,7 @@ final class FMPPC {
 		if ( is_admin() ) {
 			require_once FMPPC_DIR . 'admin/class-fmppc-admin.php';
 			require_once FMPPC_DIR . 'admin/class-fmppc-audit-page.php';
+			require_once FMPPC_DIR . 'admin/class-fmppc-bots-page.php';
 			( new FMPPC_Admin() )->hooks();
 			( new FMPPC_Audit_Page() )->hooks();
 		}
