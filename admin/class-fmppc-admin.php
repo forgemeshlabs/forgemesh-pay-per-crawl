@@ -37,6 +37,52 @@ final class FMPPC_Admin {
 			return;
 		}
 		wp_enqueue_style( 'fmppc-admin', FMPPC_URL . 'assets/admin.css', array(), FMPPC_VERSION );
+		if ( false !== strpos( $hook, 'fmppc-settings' ) ) {
+			wp_enqueue_script( 'fmppc-admin', FMPPC_URL . 'assets/admin.js', array(), FMPPC_VERSION, true );
+			wp_localize_script( 'fmppc-admin', 'fmppcRules', self::rule_options() );
+		}
+	}
+
+	/**
+	 * Option sets for the pricing-rules editor. Bots = shipped catalog + Pro
+	 * crawler feed (merged by FMPPC_Classifier::catalog) + every name already
+	 * seen in this site's ledger, so the list grows as new crawlers appear.
+	 */
+	public static function rule_options() {
+		$bots = array();
+		foreach ( FMPPC_Classifier::catalog() as $e ) {
+			$bots[ $e['name'] ] = $e['name'] . ' (' . $e['class'] . ')';
+		}
+		foreach ( FMPPC_Log::by_bot( 365, 300 ) as $b ) {
+			if ( '' !== $b['bot_name'] && 'human' !== $b['ua_class'] && ! isset( $bots[ $b['bot_name'] ] ) ) {
+				$bots[ $b['bot_name'] ] = $b['bot_name'] . ' (' . $b['ua_class'] . ', ' . sprintf( /* translators: hits */ __( 'seen %s times', 'forgemesh-pay-per-crawl' ), number_format_i18n( $b['hits'] ) ) . ')';
+			}
+		}
+		ksort( $bots, SORT_NATURAL | SORT_FLAG_CASE );
+		$opt = function ( $pairs ) { $o = array(); foreach ( $pairs as $v => $l ) { $o[] = array( 'value' => (string) $v, 'label' => (string) $l ); } return $o; };
+		$pts = array();
+		foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $p ) {
+			if ( 'attachment' !== $p->name ) {
+				$pts[ $p->name ] = $p->labels->name . ' (' . $p->name . ')';
+			}
+		}
+		$terms = function ( $tax ) {
+			$t = get_terms( array( 'taxonomy' => $tax, 'hide_empty' => false, 'number' => 500, 'orderby' => 'count', 'order' => 'DESC' ) );
+			$o = array();
+			foreach ( ( is_array( $t ) ? $t : array() ) as $x ) { $o[ $x->slug ] = $x->name . ' (' . $x->count . ')'; }
+			return $o;
+		};
+		$purposes = array();
+		foreach ( array( 'training', 'ai-search', 'user-fetch', 'agent-retrieval', 'search-index', 'seo', 'archive', 'scraping' ) as $p ) {
+			$purposes[ $p ] = FMPPC_Audit::purpose_label( $p ) . ' (' . $p . ')';
+		}
+		$classes = array();
+		foreach ( FMPPC_Classifier::classes() as $c ) { $classes[ $c ] = $c; }
+		return array(
+			'options'      => array( 'post_type' => $opt( $pts ), 'category' => $opt( $terms( 'category' ) ), 'tag' => $opt( $terms( 'post_tag' ) ), 'bot' => $opt( $bots ), 'purpose' => $opt( $purposes ), 'class' => $opt( $classes ) ),
+			'placeholders' => array( 'path' => '/guides/  (prefix)   or   /about  (exact)', 'bot' => __( 'exact user-agent name', 'forgemesh-pay-per-crawl' ) ),
+			'i18n'         => array( 'other' => __( 'Other (type a name)…', 'forgemesh-pay-per-crawl' ), 'missing' => __( '(not found on this site)', 'forgemesh-pay-per-crawl' ) ),
+		);
 	}
 
 	public function notices() {
@@ -365,31 +411,25 @@ final class FMPPC_Admin {
 				?>
 				<p><?php esc_html_e( 'Price or policy by what is being fetched and by who is fetching it. Rules are checked top to bottom; the first match wins. Anything unmatched falls back to the per-bot overrides, the class policy and the site price above. Content rules are advertised as separate entries in the x402 manifest, so indexes see each price group.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<?php if ( ! $pro_on ) : ?><p class="description" style="color:#b32d2e"><?php esc_html_e( 'Rules are saved but only enforced while a verified Pro key is present (section 5). Without one the site uses the single price above.', 'forgemesh-pay-per-crawl' ); ?></p><?php endif; ?>
-				<p class="description"><?php echo esc_html( sprintf( /* translators: 1 post types, 2 categories */ __( 'Values on this site: post types %1$s · categories %2$s · purposes training, ai-search, user-fetch, agent-retrieval, seo, archive, scraping · classes ai, seo, automation, bot, social, monitor · paths like /guides/ (prefix) or /about (exact).', 'forgemesh-pay-per-crawl' ), implode( ', ', array_map( function ( $p ) { return $p->name; }, $pts ) ), implode( ', ', array_map( function ( $t ) { return $t->slug; }, is_array( $cats ) ? $cats : array() ) ) ?: '—' ) ); ?></p>
+				<p class="description"><?php esc_html_e( 'Pick a type and the next box lists what exists on this site (your post types, categories and tags) or every crawler the plugin knows: the built-in list, the Pro crawler feed, and any bot already seen in your ledger. New crawlers show up here as they appear. Paths are typed by hand.', 'forgemesh-pay-per-crawl' ); ?></p>
 				<table class="widefat striped fmppc-rules"><thead><tr><th>#</th><th><?php esc_html_e( 'When', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'is', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'then', 'forgemesh-pay-per-crawl' ); ?></th><th><?php esc_html_e( 'price (USD)', 'forgemesh-pay-per-crawl' ); ?></th></tr></thead><tbody>
 				<?php for ( $i = 0; $i < $slots; $i++ ) :
 					$r = $rules[ $i ] ?? array( 'type' => '', 'value' => '', 'action' => 'paid', 'price_usd' => '' );
 					$n = esc_attr( FMPPC::OPTION ) . '[price_rules][' . $i . ']';
 					?>
 					<tr><td><?php echo (int) ( $i + 1 ); ?></td>
-					<td><select name="<?php echo $n; // phpcs:ignore ?>[type]"><option value=""><?php esc_html_e( '— unused —', 'forgemesh-pay-per-crawl' ); ?></option>
+					<td><select class="fmppc-rule-type" name="<?php echo $n; // phpcs:ignore ?>[type]"><option value=""><?php esc_html_e( '— unused —', 'forgemesh-pay-per-crawl' ); ?></option>
 						<?php foreach ( array( 'post_type' => __( 'post type', 'forgemesh-pay-per-crawl' ), 'category' => __( 'category', 'forgemesh-pay-per-crawl' ), 'tag' => __( 'tag', 'forgemesh-pay-per-crawl' ), 'path' => __( 'path', 'forgemesh-pay-per-crawl' ), 'bot' => __( 'bot name', 'forgemesh-pay-per-crawl' ), 'purpose' => __( 'bot purpose', 'forgemesh-pay-per-crawl' ), 'class' => __( 'bot class', 'forgemesh-pay-per-crawl' ) ) as $k => $lbl ) : ?>
 							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $k, $r['type'] ); ?>><?php echo esc_html( $lbl ); ?></option>
 						<?php endforeach; ?></select></td>
-					<td><input type="text" class="code" name="<?php echo $n; // phpcs:ignore ?>[value]" value="<?php echo esc_attr( $r['value'] ); ?>" placeholder="recipes · ClaudeBot · training · /guides/" list="fmppc-rule-values"></td>
-					<td><select name="<?php echo $n; // phpcs:ignore ?>[action]">
+					<td><select class="fmppc-rule-select" style="display:none"></select><input type="text" class="code fmppc-rule-value" name="<?php echo $n; // phpcs:ignore ?>[value]" value="<?php echo esc_attr( $r['value'] ); ?>"></td>
+					<td><select class="fmppc-rule-action" name="<?php echo $n; // phpcs:ignore ?>[action]">
 						<option value="paid" <?php selected( 'paid', $r['action'] ); ?>><?php esc_html_e( 'charge', 'forgemesh-pay-per-crawl' ); ?></option>
 						<option value="free" <?php selected( 'free', $r['action'] ); ?>><?php esc_html_e( 'free', 'forgemesh-pay-per-crawl' ); ?></option>
 						<option value="block" <?php selected( 'block', $r['action'] ); ?>><?php esc_html_e( 'block', 'forgemesh-pay-per-crawl' ); ?></option></select></td>
-					<td><input type="number" step="0.001" min="0.005" max="100" name="<?php echo $n; // phpcs:ignore ?>[price_usd]" value="<?php echo esc_attr( null === $r['price_usd'] ? '' : $r['price_usd'] ); ?>" placeholder="<?php echo esc_attr( $o['price_usd'] ); ?>" style="width:7em"></td></tr>
+					<td><input type="number" step="0.001" min="0.005" max="100" class="fmppc-rule-price" name="<?php echo $n; // phpcs:ignore ?>[price_usd]" value="<?php echo esc_attr( null === $r['price_usd'] ? '' : $r['price_usd'] ); ?>" placeholder="<?php echo esc_attr( $o['price_usd'] ); ?>" style="width:7em"></td></tr>
 				<?php endfor; ?>
 				</tbody></table>
-				<datalist id="fmppc-rule-values">
-					<?php foreach ( $pts as $p ) : ?><option value="<?php echo esc_attr( $p->name ); ?>"><?php endforeach; ?>
-					<?php foreach ( ( is_array( $cats ) ? $cats : array() ) as $t ) : ?><option value="<?php echo esc_attr( $t->slug ); ?>"><?php endforeach; ?>
-					<?php foreach ( $purposes as $p ) : ?><option value="<?php echo esc_attr( $p ); ?>"><?php endforeach; ?>
-					<?php foreach ( array( 'GPTBot', 'ClaudeBot', 'PerplexityBot', 'Bytespider', 'CCBot', 'AhrefsBot', 'SemrushBot', 'python-requests' ) as $b ) : ?><option value="<?php echo esc_attr( $b ); ?>"><?php endforeach; ?>
-				</datalist>
 				<p class="description"><?php esc_html_e( 'Examples: category recipes → charge 0.05 · post type page → free · bot purpose training → charge 0.10 · bot name Bytespider → block · path /archive/ → charge 0.005. Leave price empty to use the site price. Save with the type set to "unused" to delete a row.', 'forgemesh-pay-per-crawl' ); ?><?php if ( $rules_on ) : ?> <strong><?php echo esc_html( sprintf( /* translators: count */ _n( '%d rule active.', '%d rules active.', count( $rules ), 'forgemesh-pay-per-crawl' ), count( $rules ) ) ); ?></strong><?php endif; ?></p>
 
 				<h2><?php esc_html_e( '3. Scope', 'forgemesh-pay-per-crawl' ); ?></h2>
@@ -446,7 +486,15 @@ final class FMPPC_Admin {
 						<p class="description"><?php esc_html_e( 'Sent as the Authorization header on every verify and settle call to a custom facilitator. Leave it empty for PayAI, which needs no credentials. Use it when the facilitator you run or rent requires a key, for example Coinbase CDP (a Bearer token built from your CDP API key). It is never sent anywhere except the facilitator URL above.', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>
 				</table>
 				<h2><?php esc_html_e( '5. Pro (optional)', 'forgemesh-pay-per-crawl' ); ?></h2>
-				<p><?php esc_html_e( 'Pro adds a hosted dashboard for all your sites, a Monday email digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the ForgeMesh paid-sites directory. $4.99/month for up to 5 sites.', 'forgemesh-pay-per-crawl' ); ?>
+				<p><?php esc_html_e( 'The free plugin does all the gating. Pro is for people who want control and visibility on top of it, $4.99/month for up to 5 sites:', 'forgemesh-pay-per-crawl' ); ?></p>
+				<ul class="fmppc-pro-list">
+					<li><strong><?php esc_html_e( 'Pricing rules', 'forgemesh-pay-per-crawl' ); ?></strong> — <?php esc_html_e( 'different prices for different parts of your site and different bots (section 2b). Charge AI training crawlers more, let one bot in free, block another.', 'forgemesh-pay-per-crawl' ); ?></li>
+					<li><strong><?php esc_html_e( 'Being found, like SEO but for bots', 'forgemesh-pay-per-crawl' ); ?></strong> — <?php esc_html_e( 'Search engines find pages through sitemaps. Paying agents find sites through directories that list which pages are for sale and at what price. Pro lists this site in the ForgeMesh directory and keeps the listing current, so agents that can pay know you exist. Without a listing, a paying agent only finds you by accident.', 'forgemesh-pay-per-crawl' ); ?></li>
+					<li><strong><?php esc_html_e( 'Up-to-date bot list', 'forgemesh-pay-per-crawl' ); ?></strong> — <?php esc_html_e( 'new crawlers appear every few weeks. The feed names them so they show up in your analytics and rules by name instead of as "unknown script".', 'forgemesh-pay-per-crawl' ); ?></li>
+					<li><strong><?php esc_html_e( 'One dashboard, all sites', 'forgemesh-pay-per-crawl' ); ?></strong> — <?php esc_html_e( 'bots, payments and a revenue report with a CSV for your bookkeeper, across every site on the key, plus a Monday email digest.', 'forgemesh-pay-per-crawl' ); ?></li>
+					<li><strong><?php esc_html_e( 'A watchdog', 'forgemesh-pay-per-crawl' ); ?></strong> — <?php esc_html_e( 'a daily check that your site still answers bots with the right price and wallet, with an email if it stops.', 'forgemesh-pay-per-crawl' ); ?></li>
+				</ul>
+				<p><?php esc_html_e( 'Payments from bots never pass through ForgeMesh in any tier; they go straight to your wallet.', 'forgemesh-pay-per-crawl' ); ?>
 				<a href="<?php echo esc_url( FMPPC_Pro::BASE . '/wp?utm_source=plugin' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Get a license key', 'forgemesh-pay-per-crawl' ); ?></a></p>
 				<?php $pst = FMPPC_Pro::state(); ?>
 				<table class="form-table" role="presentation">
@@ -459,13 +507,14 @@ final class FMPPC_Admin {
 							· <a href="<?php echo esc_url( ! empty( $pst['dashboard'] ) ? $pst['dashboard'] : FMPPC_Pro::BASE . '/wp/dashboard' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'hosted dashboard', 'forgemesh-pay-per-crawl' ); ?></a></p>
 						<?php endif; ?></td></tr>
 					<tr><th><?php esc_html_e( 'Directory', 'forgemesh-pay-per-crawl' ); ?></th><td>
-						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[pro_listed]" value="1" <?php checked( 1, (int) $o['pro_listed'] ); ?>> <?php esc_html_e( 'List this site in the ForgeMesh paid-sites directory when it is in Charge mode (Pro)', 'forgemesh-pay-per-crawl' ); ?></label></td></tr>
+						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[pro_listed]" value="1" <?php checked( 1, (int) $o['pro_listed'] ); ?>> <?php esc_html_e( 'List this site in the ForgeMesh directory while it is in Charge mode (Pro)', 'forgemesh-pay-per-crawl' ); ?></label>
+						<p class="description"><?php esc_html_e( 'The directory is how agents that can pay discover sites to buy from: the same job a sitemap does for Google, but for bots with wallets. The listing shows your site name, what is for sale and the price. It never shows your visitors or your content.', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>
 			<hr>
-			<h2><?php esc_html_e( 'Get listed', 'forgemesh-pay-per-crawl' ); ?></h2>
-			<p><?php esc_html_e( 'x402 indexes pick this site up from its manifest once a first payment settles. To be listed sooner, submit the site to the ForgeMesh x402 Verified index (free by pull request, or a $0.05 paid submit).', 'forgemesh-pay-per-crawl' ); ?>
+			<h2><?php esc_html_e( 'Get found by paying agents', 'forgemesh-pay-per-crawl' ); ?></h2>
+			<p><?php esc_html_e( 'Think of this as SEO for bots. Your site already publishes a price list for machines (the discovery files in section 3). Directories read those files and tell paying agents where to shop. Some pick you up on their own after a first payment; the ForgeMesh x402 Verified index lists you right away. Submitting is free by pull request, or $0.05 for an automatic submit.', 'forgemesh-pay-per-crawl' ); ?>
 			<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( 'https://forgemesh.io/verified/claim?src=wordpress&host=' . rawurlencode( wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) ); ?>"><?php esc_html_e( 'List on ForgeMesh', 'forgemesh-pay-per-crawl' ); ?></a></p>
 			<p class="description"><?php esc_html_e( 'Without a Pro key the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented. With a Pro key it also syncs bot counts and settlements to the hosted dashboard once an hour.', 'forgemesh-pay-per-crawl' ); ?></p>
 		</div>
