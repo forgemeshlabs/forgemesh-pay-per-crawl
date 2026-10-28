@@ -282,7 +282,7 @@ final class FMPPC_Admin {
 				<tbody>
 				<?php foreach ( $bots as $b ) : ?>
 					<tr>
-						<td><strong><?php echo esc_html( $b['bot_name'] ? $b['bot_name'] : __( '(unnamed)', 'forgemesh-pay-per-crawl' ) ); ?></strong><?php if ( '1' === (string) $b['verified'] ) : ?> <span class="fmppc-badge fmppc-ok" title="<?php esc_attr_e( 'Reverse DNS verified', 'forgemesh-pay-per-crawl' ); ?>">✓</span><?php endif; ?></td>
+						<td><strong><?php if ( $b['bot_name'] ) : ?><a class="fmppc-botlink" target="_blank" rel="noopener" title="<?php esc_attr_e( 'Open in the bot directory (new tab)', 'forgemesh-pay-per-crawl' ); ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=fmppc-bots#bot-' . sanitize_title( $b['bot_name'] ) ) ); ?>"><?php echo esc_html( $b['bot_name'] ); ?></a><?php else : ?><?php esc_html_e( '(unnamed)', 'forgemesh-pay-per-crawl' ); ?><?php endif; ?></strong><?php if ( '1' === (string) $b['verified'] ) : ?> <span class="fmppc-badge fmppc-ok" title="<?php esc_attr_e( 'Reverse DNS verified', 'forgemesh-pay-per-crawl' ); ?>">✓</span><?php endif; ?></td>
 						<td><span class="fmppc-class fmppc-class-<?php echo esc_attr( $b['ua_class'] ); ?>"><?php echo esc_html( $b['ua_class'] ); ?></span></td>
 						<td><?php echo esc_html( number_format_i18n( $b['hits'] ) ); ?></td>
 						<td><?php echo esc_html( number_format_i18n( $b['sources'] ) ); ?></td>
