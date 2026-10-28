@@ -82,6 +82,11 @@
       empty.style.display = shown ? 'none' : '';
     }
     q.addEventListener('input', apply);
+    var ex = document.getElementById('fmppc-bots-expand'), co = document.getElementById('fmppc-bots-collapse');
+    function setAll(open) { groups.forEach(function (g, i) { g.open = open; defaults[i] = open; }); try { localStorage.setItem('fmppc-bots-open', open ? '1' : '0'); } catch (e) {} }
+    if (ex) ex.addEventListener('click', function () { setAll(true); });
+    if (co) co.addEventListener('click', function () { setAll(false); });
+    try { var pref = localStorage.getItem('fmppc-bots-open'); if (pref === '1') setAll(true); } catch (e) {}
     chips.forEach(function (ch) { ch.addEventListener('click', function () { chips.forEach(function (x) { x.classList.remove('is-on'); }); ch.classList.add('is-on'); filter = ch.getAttribute('data-filter'); apply(); }); });
     if (location.hash && location.hash.indexOf('#bot-') === 0) { var el = document.querySelector(location.hash); if (el) { el.closest('details').open = true; el.scrollIntoView(); el.classList.add('is-target'); } }
     apply();

@@ -164,10 +164,11 @@ final class FMPPC_Bots_Page {
 					<button type="button" class="fmppc-chip" data-filter="block"><?php esc_html_e( 'Blocked', 'forgemesh-pay-per-crawl' ); ?></button>
 				</div>
 				<span class="fmppc-bots-count" id="fmppc-bot-count"></span>
+				<span class="fmppc-bots-toggle"><button type="button" class="button button-small" id="fmppc-bots-expand"><?php esc_html_e( 'Expand all', 'forgemesh-pay-per-crawl' ); ?></button> <button type="button" class="button button-small" id="fmppc-bots-collapse"><?php esc_html_e( 'Collapse all', 'forgemesh-pay-per-crawl' ); ?></button></span>
 			</div>
 
 			<?php foreach ( $groups as $key => $g ) : if ( empty( $by[ $key ] ) ) { continue; } ?>
-				<details class="fmppc-bot-group" data-group="<?php echo esc_attr( $key ); ?>" <?php echo in_array( $key, array( 'training', 'unknown' ), true ) || count( $by[ $key ] ) <= 4 ? 'open' : ''; ?>>
+				<details class="fmppc-bot-group" data-group="<?php echo esc_attr( $key ); ?>" <?php echo 'unknown' === $key ? 'open' : ''; ?>>
 					<?php $gseen = count( array_filter( $by[ $key ], function ( $b ) { return $b['hits'] > 0; } ) ); ?>
 					<summary><span class="fmppc-bot-group-title"><?php echo esc_html( $g[0] ); ?></span> <span class="fmppc-bot-group-n"><?php echo esc_html( number_format_i18n( count( $by[ $key ] ) ) ); ?></span><?php if ( $gseen ) : ?><span class="fmppc-bot-group-seen"><?php echo esc_html( sprintf( /* translators: count */ _n( '%s seen here', '%s seen here', $gseen, 'forgemesh-pay-per-crawl' ), number_format_i18n( $gseen ) ) ); ?></span><?php endif; ?><span class="fmppc-bot-group-desc"><?php echo esc_html( $g[1] ); ?></span></summary>
 					<div class="fmppc-bot-cards">

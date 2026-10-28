@@ -82,3 +82,4 @@
 .fmppc .fmppc-feature-cta{white-space:nowrap;color:#2271b1;font-weight:600;font-size:13px}.fmppc .fmppc-popout{font-weight:600}.fmppc a.fmppc-botlink{text-decoration:none}
 .fmppc-bots .fmppc-bot-group-seen{font-size:12px;color:#0b6b2e;background:#e6f4ea;border-radius:999px;padding:1px 8px}
 .fmppc-bots .fmppc-bot[data-seen="1"]{background:#fff;border-color:#b7d1f1}.fmppc-tag-seen{background:#e8f0fe;color:#1a4fa3;font-weight:700}
+.fmppc-bots .fmppc-bots-toggle{display:flex;gap:6px}
