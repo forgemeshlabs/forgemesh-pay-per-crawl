@@ -39,7 +39,7 @@ The plugin makes outbound requests only when a payment is presented, and only to
 * **PayAI facilitator** (default): `https://facilitator.payai.network` — [terms](https://payai.network/terms) · [privacy](https://payai.network/privacy). It receives the payer's signed authorization and the payment terms (your wallet address, amount, the page URL). No visitor data, no site content.
 * Or **any facilitator URL you enter**, including one you run yourself.
 
-* **ForgeMesh Pay-per-Crawl Pro** (only after you enter a Pro license key): `https://proxy.forgemesh.io` — [terms](https://proxy.forgemesh.io/terms) · [privacy](https://proxy.forgemesh.io/privacy). The plugin sends your license key, the site's host, name, mode, price and payout wallet, daily per-bot counts (bot name, class, hits, paid, revenue, number of distinct hashed sources) and settlement records (transaction hash, payer wallet, path, amount). No visitor IPs, no page content, no human user agents. It pulls a crawler list from the same service once a day. Without a Pro key the plugin never contacts ForgeMesh.
+* **ForgeMesh Pay-per-Crawl Pro** (only after you enter a Pro license key): `https://proxy.forgemesh.io` — [terms](https://proxy.forgemesh.io/terms) · [privacy](https://proxy.forgemesh.io/privacy). The plugin sends your license key, the site's host, name, mode, price and payout wallet, daily per-bot counts (bot name, class, hits, paid, revenue, number of distinct hashed sources) and settlement records (transaction hash, payer wallet, path, amount). No visitor IPs, no page content, no human user agents. It pulls a crawler list from the same service once a day. Without a Pro key or the Crawler Atlas opt-in (off by default), the plugin never contacts ForgeMesh.
 
 Search-engine verification uses ordinary DNS lookups.
 
@@ -96,7 +96,7 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 = 0.2.3 =
 * Settings: plain-language descriptions for the Client IP header (what each header is, who sets it, why verification depends on it) and the facilitator Authorization header; warns when the site is behind a proxy but no header is selected, or the selected header is absent.
 * Analytics: shows how many agents the built-in bot list knows and when it was last revised; Pro shows when the crawler feed last refreshed.
-* Wording: "Without a Pro key the plugin never contacts ForgeMesh."
+* Wording: "Without a Pro key or the Crawler Atlas opt-in (off by default), the plugin never contacts ForgeMesh."
 * Pro: pricing rules. Charge, free or block by post type, category, tag, path, bot name, bot purpose or bot class, each with its own price; first match wins; content price groups are advertised as separate manifest entries.
 * AI Crawler Audit page (free summary; $19 one-time unlock verified offline).
 * Bot directory: searchable, grouped reference of every known crawler with this site's own sightings and policy; grows from the shipped list, the Pro feed and the ledger.

@@ -31,6 +31,7 @@ require_once FMPPC_DIR . 'includes/class-fmppc-discovery.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-pro.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-audit.php';
 require_once FMPPC_DIR . 'includes/class-fmppc-rules.php';
+require_once FMPPC_DIR . 'includes/class-fmppc-atlas.php';
 
 final class FMPPC {
 
@@ -55,6 +56,7 @@ final class FMPPC {
 			),
 			'bot_overrides'      => array(),
 			'price_rules'        => array(), // Pro: ordered rules, see FMPPC_Rules
+			'atlas_share'        => 0, // opt-in: daily anonymous per-bot counts to Crawler Atlas
 			'allow_paths'        => array(),
 			'gate_feeds'         => 0,
 			'gate_rest'          => 0,
@@ -100,6 +102,7 @@ final class FMPPC {
 		( new FMPPC_Pro( $s ) )->hooks();
 		( new FMPPC_Gate( $s ) )->hooks();
 		add_action( 'fmppc_daily', array( __CLASS__, 'daily' ) );
+		add_action( 'fmppc_daily', array( 'FMPPC_Atlas', 'daily' ), 20 );
 		if ( is_admin() ) {
 			require_once FMPPC_DIR . 'admin/class-fmppc-admin.php';
 			require_once FMPPC_DIR . 'admin/class-fmppc-audit-page.php';

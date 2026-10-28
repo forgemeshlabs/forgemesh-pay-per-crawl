@@ -155,7 +155,7 @@ final class FMPPC_Admin {
 			}
 		}
 		$out['price_rules'] = FMPPC_Rules::sanitize( $in['price_rules'] ?? array() );
-		foreach ( array( 'gate_feeds', 'gate_rest', 'log_humans', 'discovery', 'publish_contact' ) as $flag ) {
+		foreach ( array( 'gate_feeds', 'gate_rest', 'log_humans', 'discovery', 'publish_contact', 'atlas_share' ) as $flag ) {
 			$out[ $flag ] = empty( $in[ $flag ] ) ? 0 : 1;
 		}
 		$hdr = strtolower( sanitize_text_field( (string) ( $in['trust_proxy_header'] ?? '' ) ) );
@@ -455,6 +455,10 @@ final class FMPPC_Admin {
 					<tr><th><?php esc_html_e( 'Discovery files', 'forgemesh-pay-per-crawl' ); ?></th><td>
 						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[discovery]" value="1" <?php checked( 1, (int) $o['discovery'] ); ?>> <?php esc_html_e( 'Serve /.well-known/x402.json, /llms.txt and /agents.txt so paying agents and x402 indexes can find this site', 'forgemesh-pay-per-crawl' ); ?></label><br>
 						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[publish_contact]" value="1" <?php checked( 1, (int) $o['publish_contact'] ); ?>> <?php esc_html_e( 'Include the site admin email as the contact in the manifest', 'forgemesh-pay-per-crawl' ); ?></label></td></tr>
+					<tr><th><?php esc_html_e( 'Crawler Atlas', 'forgemesh-pay-per-crawl' ); ?></th><td>
+						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[atlas_share]" value="1" <?php checked( 1, (int) $o['atlas_share'] ); ?>> <?php esc_html_e( 'Share anonymous daily bot counts with Crawler Atlas', 'forgemesh-pay-per-crawl' ); ?></label>
+						<p class="description"><?php esc_html_e( 'Crawler Atlas (forgemesh.io/bots) is the public map of who crawls the web, built from sites like this one. Once a day the plugin sends, for each bot: its name and class, how many times it fetched, how many passed verification or were impostors, how many paid, and whether this site charges, allows or blocks it and at what price. It never sends your site address, visitor addresses, paths, user agents or content; the only identifier is a random id this plugin made up. In return every site, including yours, sees new crawlers the day they appear. Off by default.', 'forgemesh-pay-per-crawl' ); ?></p>
+						<?php $ast = FMPPC_Atlas::state(); if ( ! empty( $o['atlas_share'] ) && ! empty( $ast['sent_at'] ) ) : ?><p class="description"><?php echo esc_html( sprintf( /* translators: 1 day, 2 rows, 3 ago */ __( 'Last report: %1$s, %2$d bots, %3$s ago', 'forgemesh-pay-per-crawl' ), $ast['last_day'], (int) $ast['rows'], human_time_diff( (int) $ast['sent_at'] ) ) ); ?><?php echo empty( $ast['ok'] ) ? ' (' . esc_html( $ast['error'] ) . ')' : ''; ?></p><?php endif; ?></td></tr>
 					<tr><th><?php esc_html_e( 'Logging', 'forgemesh-pay-per-crawl' ); ?></th><td>
 						<label><input type="checkbox" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[log_humans]" value="1" <?php checked( 1, (int) $o['log_humans'] ); ?>> <?php esc_html_e( 'Count human page views too (for the bot-vs-human ratio)', 'forgemesh-pay-per-crawl' ); ?></label><br>
 						<label><?php esc_html_e( 'Keep rows for', 'forgemesh-pay-per-crawl' ); ?> <input type="number" min="1" max="3650" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[retention_days]" value="<?php echo esc_attr( $o['retention_days'] ); ?>" style="width:5em"> <?php esc_html_e( 'days', 'forgemesh-pay-per-crawl' ); ?></label></td></tr>
@@ -528,7 +532,7 @@ final class FMPPC_Admin {
 			<h2><?php esc_html_e( 'Get found by paying agents', 'forgemesh-pay-per-crawl' ); ?></h2>
 			<p><?php esc_html_e( 'Think of this as SEO for bots. Your site already publishes a price list for machines (the discovery files in section 3). Directories read those files and tell paying agents where to shop. Some pick you up on their own after a first payment; the ForgeMesh x402 Verified index lists you right away. Submitting is free by pull request, or $0.05 for an automatic submit.', 'forgemesh-pay-per-crawl' ); ?>
 			<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( 'https://forgemesh.io/verified/claim?src=wordpress&host=' . rawurlencode( wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ) ); ?>"><?php esc_html_e( 'List on ForgeMesh', 'forgemesh-pay-per-crawl' ); ?></a></p>
-			<p class="description"><?php esc_html_e( 'Without a Pro key the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented. With a Pro key it also syncs bot counts and settlements to the hosted dashboard once an hour.', 'forgemesh-pay-per-crawl' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Without a Pro key or the Crawler Atlas opt-in, the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented. With a Pro key it syncs bot counts and settlements to the hosted dashboard hourly; with Atlas sharing on it sends anonymous per-bot counts once a day.', 'forgemesh-pay-per-crawl' ); ?></p>
 		</div>
 		<?php
 	}
