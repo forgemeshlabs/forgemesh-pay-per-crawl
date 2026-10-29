@@ -100,7 +100,7 @@ final class FMPPC_Admin {
 			return;
 		}
 		if ( '' === $s['pay_to'] ) {
-			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Add your payout wallet (an Ethereum-style 0x address on Base) in Settings to start charging. Until then the plugin only observes.', 'forgemesh-pay-per-crawl' ) . '</p></div>';
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Add your payout wallet (an Ethereum-style 0x address on Base) in Settings to start charging. Until then the plugin only observes.', 'forgemesh-pay-per-crawl' ) . ' <a href="https://forgemesh.io/wallet?utm_source=plugin" target="_blank" rel="noopener">' . esc_html__( 'No wallet yet? 15-minute setup guide', 'forgemesh-pay-per-crawl' ) . '</a></p></div>';
 		} elseif ( 'monitor' === $s['mode'] ) {
 			echo '<div class="notice notice-info"><p>' . esc_html__( 'Monitor mode: bots are logged with the revenue they would have paid, nothing is charged yet. Switch the mode to "Charge" in Settings when the numbers look right.', 'forgemesh-pay-per-crawl' ) . '</p></div>';
 		}
@@ -362,7 +362,7 @@ final class FMPPC_Admin {
 				<table class="form-table" role="presentation">
 					<tr><th><label for="fmppc_pay_to"><?php esc_html_e( 'Payout wallet', 'forgemesh-pay-per-crawl' ); ?></label></th>
 						<td><input type="text" class="regular-text code" id="fmppc_pay_to" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[pay_to]" value="<?php echo esc_attr( $o['pay_to'] ); ?>" placeholder="0x…" pattern="0x[0-9a-fA-F]{40}">
-						<p class="description"><?php esc_html_e( 'An Ethereum-style address on Base. Every payment is sent here directly by the payer; nothing is held by anyone else. Use a wallet you control (Coinbase Wallet, MetaMask, Rabby, a hardware wallet).', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>
+						<p class="description"><?php esc_html_e( 'An Ethereum-style address on Base. Every payment is sent here directly by the payer; nothing is held by anyone else. Use a wallet you control (Coinbase Wallet, MetaMask, Rabby, a hardware wallet).', 'forgemesh-pay-per-crawl' ); ?> <a href="https://forgemesh.io/wallet?utm_source=plugin" target="_blank" rel="noopener"><?php esc_html_e( 'New to wallets? Setup guide: seed phrase safety, MetaMask step by step, cold wallets', 'forgemesh-pay-per-crawl' ); ?> &#8599;</a></p></td></tr>
 					<tr><th><label for="fmppc_price"><?php esc_html_e( 'Price per page (USD)', 'forgemesh-pay-per-crawl' ); ?></label></th>
 						<td><input type="number" step="0.001" min="0.005" max="100" id="fmppc_price" name="<?php echo esc_attr( FMPPC::OPTION ); ?>[price_usd]" value="<?php echo esc_attr( $o['price_usd'] ); ?>">
 						<p class="description"><?php esc_html_e( 'Charged in USDC per page fetch. $0.005 is the floor; $0.01 is a sensible start.', 'forgemesh-pay-per-crawl' ); ?></p></td></tr>

@@ -4,7 +4,7 @@ Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.2.4
+Stable tag: 0.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,9 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 6. AI Crawler Audit: summary of operators, bandwidth and value, with the one-time unlock for the full report.
 
 == Changelog ==
+
+= 0.2.5 =
+* Settings: the payout wallet field and the first-run notice link to a wallet setup guide (seed phrase safety, MetaMask step by step, cold wallets).
 
 = 0.2.4 =
 * Hosted account is now free: dashboard, crawler-intel feed, directory listing and badge need a key but no subscription. Pro ($4.99/month, same key) keeps pricing rules, the revenue report with CSV, paywall monitoring and the Monday digest.

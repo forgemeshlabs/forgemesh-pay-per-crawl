@@ -3,7 +3,7 @@
  * Plugin Name:       ForgeMesh Pay-per-Crawl
  * Plugin URI:        https://forgemesh.io/wordpress
  * Description:       Bot ledger plus an HTTP 402 price tag: see every AI, SEO and script crawler, keep search engines free, charge x402-capable agents in USDC on Base.
- * Version:           0.2.4
+ * Version:           0.2.5
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            ForgeMesh Labs
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FMPPC_VERSION', '0.2.4' );
+define( 'FMPPC_VERSION', '0.2.5' );
 define( 'FMPPC_FILE', __FILE__ );
 define( 'FMPPC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FMPPC_URL', plugin_dir_url( __FILE__ ) );
