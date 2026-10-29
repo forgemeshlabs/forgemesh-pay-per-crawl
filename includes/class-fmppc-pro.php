@@ -1,8 +1,10 @@
 <?php
 /**
- * Pro: optional hosted service (license key). Hourly sync of daily rollups and
+ * Hosted account (optional, license key). Hourly sync of daily rollups and
  * settlements to the hosted dashboard, daily crawler-intel pull, license check.
- * Nothing here runs without a license key; the free plugin never calls out.
+ * The account is free; a Pro subscription on the same key turns on pricing
+ * rules, the revenue report, paywall monitoring and the digest (state['pro']).
+ * Nothing here runs without a key; without one the plugin never calls out.
  *
  * @package ForgeMesh_Pay_Per_Crawl
  */
@@ -81,6 +83,8 @@ final class FMPPC_Pro {
 			array(
 				'verified_at' => time(),
 				'ok'          => ! empty( $r['ok'] ),
+				'pro'         => ! empty( $r['ok'] ) && ! empty( $r['pro'] ),
+				'plan'        => (string) ( $r['plan'] ?? '' ),
 				'status'      => (string) ( $r['status'] ?? ( $r['error'] ?? 'error' ) ),
 				'email'       => (string) ( $r['email'] ?? '' ),
 				'sites_used'  => (int) ( $r['sites_used'] ?? 0 ),

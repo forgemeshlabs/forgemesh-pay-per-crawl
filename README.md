@@ -33,7 +33,7 @@ This is what happens when an x402-capable client fetches a page.
 3. The plugin posts that authorization to an x402 **facilitator** (PayAI by default, no key needed; any facilitator URL can be set), which verifies it and submits it on-chain. The facilitator never holds funds.
 4. The page is served only when a transaction hash comes back. The hit, payer and hash are recorded.
 
-Without a Pro key or the Crawler Atlas opt-in (off by default), the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented.
+Without a hosted-account key or the Crawler Atlas opt-in (off by default), the plugin never contacts ForgeMesh. Its only outbound requests are to the facilitator you chose, and only when a payment is presented.
 
 ## Verified
 

@@ -23,13 +23,13 @@ final class FMPPC_Rules {
 		return array( 'post_type', 'category', 'tag', 'path' );
 	}
 
-	/** Rules are live only with a verified Pro key. */
+	/** Rules are live only with a verified key on a Pro plan (a free key keeps the single site price). */
 	public static function active( array $s ) {
 		if ( empty( $s['price_rules'] ) || ! FMPPC_Pro::enabled( $s ) ) {
 			return false;
 		}
 		$st = FMPPC_Pro::state();
-		return ! empty( $st['ok'] );
+		return ! empty( $st['ok'] ) && ! empty( $st['pro'] );
 	}
 
 	public static function sanitize( $raw ) {

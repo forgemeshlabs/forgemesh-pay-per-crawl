@@ -4,7 +4,7 @@ Tags: ai crawlers, bots, paywall, x402, analytics
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,8 @@ Pay-per-Crawl shows you every AI crawler, SEO crawler and script that fetches yo
 * **AI crawlers, SEO crawlers and scripts get HTTP 402 Payment Required.** The response carries the x402 challenge (v2 header and v1 body, so every current client can pay) and an MPP challenge. An x402-capable client pays USDC on Base and retries; a crawler that cannot pay gets no content; the page is served only after the payment is settled on-chain.
 * **You keep 100%.** The payer's USDC goes directly to the wallet you enter. Nothing is held by the plugin, by ForgeMesh, or by anyone else.
 * **Bot analytics in wp-admin.** Who is crawling (by name and class), how often, from how many sources, which paths, what was paid, every settlement with its transaction link. Start in *Monitor* mode and see what the bots would have paid before you charge anything.
-* **Pro (optional, $4.99/month).** A hosted dashboard for up to 5 sites, a Monday digest, daily paywall monitoring with alerts, a crawler-intelligence feed that keeps the bot list current, and a listing in the paid-sites directory. Everything above works without it.
+* **Hosted account (optional, free).** A hosted dashboard for up to 5 sites, a crawler-intelligence feed that keeps the bot list current, and a listing in the paid-sites directory. Everything above works without it.
+* **Pro (optional, $4.99/month on the same key).** Pricing rules by bot and content group, a revenue report with a settlements CSV, daily paywall monitoring with alerts, and a Monday digest.
 * **Bot directory.** Every crawler the plugin knows, explained for humans: who runs it, what it does with your pages, how it is verified, its robots.txt line, and what your site currently does with it. Searchable, grouped by purpose, and it grows as new bots appear on your site.
 * **Discovery built in.** The plugin serves `/.well-known/x402.json`, `/llms.txt` and `/agents.txt` and adds lines to `robots.txt`, so paying agents and x402 indexes find your paid pages.
 
@@ -93,6 +94,11 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 
 == Changelog ==
 
+= 0.2.4 =
+* Hosted account is now free: dashboard, crawler-intel feed, directory listing and badge need a key but no subscription. Pro ($4.99/month, same key) keeps pricing rules, the revenue report with CSV, paywall monitoring and the Monday digest.
+* Pricing rules are enforced only while the key is on a Pro plan; a free key keeps the single site price. The license check now records the plan.
+* Settings section 5 renamed to Hosted account with the two tiers spelled out.
+
 = 0.2.3 =
 * Settings: plain-language descriptions for the Client IP header (what each header is, who sets it, why verification depends on it) and the facilitator Authorization header; warns when the site is behind a proxy but no header is selected, or the selected header is absent.
 * Analytics: shows how many agents the built-in bot list knows and when it was last revised; Pro shows when the crawler feed last refreshed.
@@ -109,7 +115,7 @@ Payers get a 402 with the reason, can retry, and are never charged. Humans are n
 * Security: with a multi-value client-IP header (X-Forwarded-For), use the right-most address so a crawler cannot prepend a search-engine IP and bypass the paywall.
 
 = 0.2.0 =
-* Pro: license key, hourly sync to the hosted dashboard, crawler-intel feed merged into the classifier, directory opt-in.
+* Hosted account (free key): hourly sync to the hosted dashboard, crawler-intel feed merged into the classifier, directory opt-in. Pro (same key, $4.99/month): pricing rules, revenue report, paywall monitoring, digest.
 * CSV export neutralises formula-leading cells.
 
 = 0.1.0 =
